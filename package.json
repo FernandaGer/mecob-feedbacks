@@ -2,7 +2,7 @@
   "name": "mecob-feedbacks",
   "version": "1.0.0",
   "scripts": {
-    "build": "echo 'build ok'"
+    "build": "echo ok"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0"
