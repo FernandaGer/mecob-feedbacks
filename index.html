@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MECOB - Feedbacks Semanais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#F5F3EF;--sf:#FFF;--sf2:#EDEBE6;--bd:#E0DDD6;--bd2:#CCCAB8;--tx:#1C1B18;--mu:#7A7870;--fa:#B8B5AE;--gr:#2E6B3E;--gr-bg:#E8F3EB;--ye:#8A6200;--ye-bg:#FDF3D9;--re:#B02A2A;--re-bg:#FBEAEA;--bl:#1A4E8A;--bl-bg:#E8F0FA;--r:10px;--rl:16px;--sans:'Inter',sans-serif;--mono:'DM Mono',monospace;--sh:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100vh;line-height:1.6;font-size:15px}
+.shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+@media(max-width:720px){.shell{grid-template-columns:1fr}}
+.sidebar{background:var(--tx);color:#fff;padding:28px 18px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto}
+@media(max-width:720px){.sidebar{position:static;height:auto;padding:14px;flex-direction:row;flex-wrap:wrap;gap:4px}}
+.logo{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:rgba(255,255,255,.4);margin-bottom:20px;text-transform:uppercase}
+@media(max-width:720px){.logo{width:100%;margin-bottom:8px}}
+.nb{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--r);border:none;background:transparent;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s;text-align:left;width:100%}
+.nb:hover{background:rgba(255,255,255,.08);color:#fff}
+.nb.active{background:rgba(255,255,255,.14);color:#fff}
+.nb svg{width:15px;height:15px;flex-shrink:0}
+@media(max-width:720px){.nb{width:auto;padding:7px 10px;font-size:11px}}
+.main{padding:36px 32px;overflow-y:auto}
+@media(max-width:720px){.main{padding:18px 14px}}
+.page{display:none}.page.active{display:block}
+.ph{margin-bottom:26px}
+.ph h1{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
+.ph p{font-size:14px;color:var(--mu)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:20px 22px;margin-bottom:14px;box-shadow:var(--sh)}
+.cl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);display:block;margin-bottom:10px}
+.mr{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:600px){.mr{grid-template-columns:repeat(2,1fr)}}
+.mt{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--sh)}
+.mt .num{font-size:26px;font-weight:600;letter-spacing:-.02em;font-family:var(--mono)}
+.mt .lbl{font-size:12px;color:var(--mu);margin-top:3px}
+.pg{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:18px 22px;margin-bottom:20px;box-shadow:var(--sh)}
+.pg-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.pg-tr{height:6px;background:var(--sf2);border-radius:3px;overflow:hidden}
+.pg-fi{height:6px;background:var(--gr);border-radius:3px;transition:width .6s}
+.pg-ms{font-size:12px;color:var(--mu);margin-top:8px}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px;margin-bottom:20px}
+.lc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:14px;cursor:pointer;transition:all .15s;box-shadow:var(--sh)}
+.lc:hover{border-color:var(--bd2);transform:translateY(-1px)}
+.lc.sel{border:2px solid var(--tx)}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-bottom:10px;font-family:var(--mono)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;font-family:var(--mono)}
+.bg-g{background:var(--gr-bg);color:var(--gr)}.bg-y{background:var(--ye-bg);color:var(--ye)}.bg-r{background:var(--re-bg);color:var(--re)}.bg-n{background:var(--sf2);color:var(--mu)}
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px;margin-bottom:20px}
+.oc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 16px;box-shadow:var(--sh)}
+.bt{height:4px;background:var(--sf2);border-radius:2px;overflow:hidden;margin:8px 0 5px}
+.bf{height:4px;border-radius:2px}
+.el{display:flex;flex-direction:column;gap:10px}
+.ei{background:var(--sf2);border-radius:var(--r);padding:12px 14px;border-left:3px solid var(--bd2)}
+.ei.pos{border-left-color:var(--gr)}.ei.neu{border-left-color:var(--ye)}.ei.neg{border-left-color:var(--re)}
+.eh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;margin-bottom:8px}
+.kp{background:var(--sf);border-radius:var(--r);padding:8px 10px;border:1px solid var(--bd)}
+.kv{font-size:14px;font-weight:600;font-family:var(--mono)}.kl{font-size:11px;color:var(--mu);margin-top:1px}
+.tl{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--sf);border:1px solid var(--bd);color:var(--mu);font-family:var(--mono)}
+.as{background:var(--re-bg);border-radius:var(--r);padding:10px 14px;margin-bottom:8px;font-size:13px;color:var(--re);line-height:1.5;display:flex;gap:10px;border:1px solid #F0C0C0}
+.ws{background:var(--ye-bg);border-radius:var(--r);padding:10px 14px;margin-bottom:8px;font-size:13px;color:var(--ye);line-height:1.5;display:flex;gap:10px;border:1px solid #E8D090}
+.is{background:var(--sf2);border-radius:var(--r);padding:10px 14px;margin-bottom:8px;font-size:13px;color:var(--mu);line-height:1.5;display:flex;gap:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;margin-top:5px}
+.sc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.sc-b{border-radius:var(--r);padding:12px;text-align:center}
+.sc-b.pes{background:var(--re-bg)}.sc-b.rea{background:var(--gr-bg);outline:1.5px solid var(--gr)}.sc-b.oti{background:var(--bl-bg)}
+.dm{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.db{border-radius:var(--r);padding:8px 10px;text-align:center;border:1px solid var(--bd)}
+select,input[type=text],textarea{width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--bd);border-radius:var(--r);background:var(--sf2);color:var(--tx);font-family:var(--sans);transition:border-color .15s;outline:none}
+select:focus,input:focus,textarea:focus{border-color:var(--tx)}
+textarea{resize:vertical;line-height:1.5}
+.fl{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);display:block;margin-bottom:6px}
+.fr{margin-bottom:14px}
+.btn{padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);border:1px solid var(--bd);background:transparent;color:var(--tx);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--sf2)}
+.btnp{background:var(--tx);color:#fff;border-color:transparent}
+.btnp:hover{background:#333}
+.btnd{background:var(--re);color:#fff;border-color:transparent}
+.btnd:hover{background:#8B2020}
+.msg-ok{margin-top:10px;font-size:13px;padding:8px 12px;border-radius:var(--r);background:var(--gr-bg);color:var(--gr)}
+.msg-err{margin-top:10px;font-size:13px;padding:8px 12px;border-radius:var(--r);background:var(--re-bg);color:var(--re)}
+.dh{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--bd)}
+.dv{height:1px;background:var(--bd);margin:16px 0}
+.st{font-size:16px;font-weight:600;letter-spacing:-.01em;margin-bottom:14px}
+.emp{text-align:center;padding:40px 20px;color:var(--mu);font-size:13px}
+.cw{position:relative;width:100%;height:220px;margin-bottom:20px}
+.fb-g{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+@media(max-width:760px){.fb-g{grid-template-columns:1fr}}
+.fb-l{display:flex;flex-direction:column;gap:6px}
+.fb-b{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);cursor:pointer;transition:all .15s;font-family:var(--sans);width:100%;text-align:left}
+.fb-b:hover{border-color:var(--bd2)}
+.fb-b.active{border:1.5px solid var(--tx);background:var(--sf2)}
+.fb-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;font-family:var(--mono);flex-shrink:0}
+.fb-p{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:22px 24px;box-shadow:var(--sh)}
+.fb-ph{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bd)}
+.fb-bu{display:flex;gap:8px;font-size:13px;line-height:1.5;margin-bottom:6px;padding:7px 10px;border-radius:8px}
+.fb-bu.pos{background:var(--gr-bg)}.fb-bu.neg{background:var(--re-bg)}.fb-bu.warn{background:var(--ye-bg)}
+.fb-cp{font-size:12px;color:var(--gr);align-self:center;display:none}
+.wr{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.wr select{max-width:240px}
+/* Upload */
+.up-zone{border:2px dashed var(--bd2);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--sf2);margin-bottom:14px}
+.up-zone:hover,.up-zone.drag{border-color:var(--gr);background:var(--gr-bg)}
+.up-zone input[type=file]{display:none}
+.up-name{font-size:12px;color:var(--gr);font-weight:500;margin-top:6px;font-family:var(--mono);display:none}
+/* Modal PDF */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal-box{background:#fff;border-radius:var(--rl);width:90vw;max-width:920px;height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.modal-hdr span{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
+.modal-btns{display:flex;gap:8px}
+.modal-close{padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd);background:transparent;cursor:pointer;font-size:13px;font-family:var(--sans)}
+.modal-dl{padding:7px 16px;border-radius:var(--r);border:none;background:var(--tx);color:#fff;cursor:pointer;font-size:13px;font-family:var(--sans)}
+.modal-frame{flex:1;border:none;width:100%}
+.doc-pill{display:inline-flex;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px;font-size:11px;font-family:var(--mono);color:var(--mu);cursor:pointer;transition:all .15s;margin-top:8px}
+.doc-pill:hover{border-color:var(--bd2);color:var(--tx);background:var(--sf)}
+.doc-pill svg{width:13px;height:13px;flex-shrink:0}
+/* Alert notes */
+.al-item{border-radius:var(--r);padding:14px;margin-bottom:10px;border:1px solid transparent}
+.al-item.as{background:var(--re-bg);border-color:#F0C0C0;color:var(--re)}
+.al-item.ws{background:var(--ye-bg);border-color:#E8D090;color:var(--ye)}
+.al-item.is{background:var(--sf2);color:var(--mu)}
+.al-note-wrap{margin-top:10px;border-top:1px solid rgba(0,0,0,.08);padding-top:8px}
+.al-note-hdr{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:4px 0;user-select:none}
+.al-note-lbl{font-size:12px;font-weight:500;opacity:.7;transition:opacity .15s}
+.al-note-icon{font-size:11px;opacity:.5}
+.al-note-body{margin-top:8px}
+.al-note-ta{width:100%;min-height:80px;resize:vertical;font-size:13px;line-height:1.55;padding:9px 12px;border:1px solid rgba(0,0,0,.12);border-radius:var(--r);background:rgba(255,255,255,.6);font-family:var(--sans);color:var(--tx);outline:none;transition:border-color .15s}
+.al-note-ta:focus{border-color:rgba(0,0,0,.3);background:#fff}
+.al-clear-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid rgba(0,0,0,.15);background:transparent;cursor:pointer;color:var(--mu);font-family:var(--sans);transition:all .15s}
+.al-clear-btn:hover{background:rgba(0,0,0,.06)}
+/* Confirmar exclusao */
+.confirm-box{background:var(--re-bg);border:1px solid #F0C0C0;border-radius:var(--r);padding:16px;margin-top:14px;display:none}
+.confirm-box.show{display:block}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="logo">MECOB</div>
+  <button class="nb active" onclick="goPage('overview',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Visao geral</button>
+  <button class="nb" onclick="goPage('alertas',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Alertas</button>
+  <button class="nb" onclick="goPage('lideres',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Lideres</button>
+  <button class="nb" onclick="goPage('feedbacks',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Feedbacks</button>
+  <button class="nb" onclick="goPage('comparar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Comparar</button>
+  <button class="nb" onclick="goPage('registrar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Registrar</button>
+  <button class="nb" onclick="goPage('analise',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Analise semanal</button>
+  <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.1)">
+    <button class="nb" style="color:rgba(255,100,100,.7)" onclick="showZerar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>Zerar dados</button>
+  </div>
+</aside>
+<main class="main">
+  <!-- OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div class="ph"><h1>Visao geral</h1><p id="ciclo-label">Motta Gestao e Cobranca — acompanhamento semanal</p></div>
+    <div class="pg" id="pg"></div>
+    <div class="mr" id="ov-m"></div>
+    <div class="st">Score por lider (media historica)</div>
+    <div class="cw"><canvas id="ovc" role="img" aria-label="Score por lider"></canvas></div>
+    <div class="st">Resumo por lider</div>
+    <div class="og" id="ov-c"></div>
+    <!-- Zerar confirm -->
+    <div class="confirm-box" id="confirm-box">
+      <div style="font-size:14px;font-weight:600;color:var(--re);margin-bottom:8px">Zerar todos os dados?</div>
+      <div style="font-size:13px;color:var(--re);margin-bottom:14px">Esta acao apaga todos os registros, alertas e anotacoes. Nao pode ser desfeita.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btnd" onclick="zerarDados()">Sim, zerar tudo</button>
+        <button class="btn" onclick="hideZerar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <!-- ALERTAS -->
+  <div class="page" id="page-alertas">
+    <div class="ph"><h1>Alertas</h1><p>Situacoes que merecem atencao da gestao</p></div>
+    <div id="al-c"></div>
+  </div>
+  <!-- LIDERES -->
+  <div class="page" id="page-lideres">
+    <div class="ph"><h1>Lideres</h1><p>Clique para ver historico completo e scores por dimensao</p></div>
+    <div class="lgrid" id="lgrid"></div>
+    <div id="ldet"></div>
+  </div>
+  <!-- FEEDBACKS -->
+  <div class="page" id="page-feedbacks">
+    <div class="ph"><h1>Feedbacks</h1><p>Texto pronto para enviar — edite antes de copiar. Edicoes salvas automaticamente.</p></div>
+    <div class="fb-g">
+      <div class="fb-l" id="fb-l"></div>
+      <div id="fb-p"><div class="emp" style="margin-top:60px">Selecione um lider para ver o feedback</div></div>
+    </div>
+  </div>
+  <!-- COMPARAR -->
+  <div class="page" id="page-comparar">
+    <div class="ph"><h1>Comparar semana</h1><p>Todos os lideres de uma mesma semana lado a lado</p></div>
+    <div class="wr"><label class="fl" style="margin:0">Semana</label><select id="cmp-w" onchange="renderCmp()"></select></div>
+    <div id="cmp-c"></div>
+  </div>
+  <!-- REGISTRAR -->
+  <div class="page" id="page-registrar">
+    <div class="ph"><h1>Registrar feedback</h1><p>Anexe o arquivo, cole o texto e atribua scores pelas 4 dimensoes da rubrica</p></div>
+    <div class="card">
+      <div class="fr">
+        <label class="fl">Arquivo original (PDF ou DOCX)</label>
+        <div class="up-zone" id="up-zone"
+             onclick="document.getElementById('up-input').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="handleDrop(event)">
+          <input type="file" id="up-input" accept=".pdf,.docx,.doc" onchange="handleFile(this.files[0])"/>
+          <div style="font-size:13px;color:var(--mu)">Clique ou arraste o arquivo aqui</div>
+          <div style="font-size:11px;color:var(--fa);margin-top:2px">PDF ou DOCX — ate 5MB</div>
+          <div class="up-name" id="up-name"></div>
+        </div>
+      </div>
+      <div class="fr"><label class="fl">Lider</label><select id="rg-l" onchange="atualizaFormReg()"></select></div>
+      <div class="fr"><label class="fl">Semana</label><input type="text" id="rg-s"/></div>
+      <div id="scores-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px">
+        <div><label class="fl">D1 — Resultado</label><select id="rg-d1"><option value="5">5 — Excelente</option><option value="4">4 — Bom</option><option value="3" selected>3 — Regular</option><option value="2">2 — Abaixo</option><option value="1">1 — Critico</option></select></div>
+        <div><label class="fl">D2 — Execucao</label><select id="rg-d2"><option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div><label class="fl">D3 — Iniciativas</label><select id="rg-d3"><option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div><label class="fl">D4 — Relatorio</label><select id="rg-d4"><option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option></select></div>
+      </div>
+      <div class="fr"><label class="fl" id="rg-t-label">Texto do feedback (cole o conteudo do relatorio)</label><textarea id="rg-t" style="min-height:120px" placeholder="Cole aqui o conteudo extraido do arquivo..."></textarea></div>
+      <div class="fr"><label class="fl">Resumo / analise</label><textarea id="rg-a" style="min-height:70px" placeholder="Sua analise (opcional)"></textarea></div>
+      <div class="fr"><label class="fl">Temas (separados por virgula)</label><input type="text" id="rg-tg" placeholder="ex: comercial, ia, cobranca"/></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btnp" onclick="salvar()">Salvar feedback</button>
+      </div>
+      <div id="rg-m" style="margin-top:8px"></div>
+    </div>
+  </div>
+  <!-- ANALISE -->
+  <div class="page" id="page-analise">
+    <div class="ph"><h1>Analise semanal</h1><p>Visao consolidada com geracao por IA</p></div>
+    <div class="card">
+      <div class="wr">
+        <label class="fl" style="margin:0">Semana</label>
+        <select id="an-w" onchange="renderAnalise()"></select>
+        <button class="btn btnp" onclick="gerarAnalise()">Analisar com IA</button>
+      </div>
+      <div id="an-s"></div>
+    </div>
+    <div id="an-r"></div>
+  </div>
+</main>
+</div>
+
+<!-- Modal E-mail -->
+<div class="modal-bg" id="email-modal" onclick="if(event.target===this)closeEmailModal()">
+  <div class="modal-box" style="height:auto;max-width:480px">
+    <div class="modal-hdr">
+      <span>Enviar feedback — <span id="em-nome"></span></span>
+      <div class="modal-btns"><button class="modal-close" onclick="closeEmailModal()">Fechar</button></div>
+    </div>
+    <div style="padding:24px">
+      <p style="font-size:13px;color:var(--mu);margin-bottom:20px">Escolha como abrir o e-mail:</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a id="em-zimbra-link" href="#" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);text-decoration:none;color:var(--tx);transition:all .15s" onmouseover="this.style.borderColor='var(--bd2)'" onmouseout="this.style.borderColor='var(--bd)'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A4E8A" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <div>
+            <div style="font-size:13px;font-weight:600">Abrir no Zimbra Web</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">Abre uma nova aba com o Zimbra ja preenchido</div>
+          </div>
+        </a>
+        <a id="em-mailto-link" href="#" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);text-decoration:none;color:var(--tx);transition:all .15s" onmouseover="this.style.borderColor='var(--bd2)'" onmouseout="this.style.borderColor='var(--bd)'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <div>
+            <div style="font-size:13px;font-weight:600">Abrir cliente de e-mail (mailto)</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">Abre o app de e-mail configurado no sistema</div>
+          </div>
+        </a>
+      </div>
+      <p style="font-size:11px;color:var(--fa);margin-top:16px;line-height:1.5">Para o Zimbra Web funcionar, voce precisa estar logada em <strong>zimbra.carlosmotta.adv.br</strong> em outra aba.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal PDF -->
+<div class="modal-bg" id="pdf-modal" onclick="if(event.target===this)closeMod()">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span id="mod-title">Relatorio</span>
+      <div class="modal-btns">
+        <button class="modal-dl" onclick="dlArq()">Baixar</button>
+        <button class="modal-close" onclick="closeMod()">Fechar</button>
+      </div>
+    </div>
+    <iframe class="modal-frame" id="mod-frame" title="Visualizacao do relatorio"></iframe>
+  </div>
+</div>
+
+<script>
+var LL=[
+  {id:"luana",name:"Luana",dept:"Relacionamento com o Cliente",color:"#7F77DD",email:"contato@mecob.com.br"},
+  {id:"andressa",name:"Andressa",dept:"Relacionamento com o Cliente",color:"#D4537E",email:"cobranca4@mecob.com.br"},
+  {id:"ketrirrine",name:"Ketrirrine",dept:"Relacionamento com o Cliente",color:"#1D9E75",email:"relacionamento5@mecob.com.br"},
+  {id:"vitoria_o",name:"Vitoria Olanda",dept:"Confirmacao e Emissao",color:"#EF9F27",email:"sucesso@mecob.com.br"},
+  {id:"vitoria_s",name:"Vitoria Souza",dept:"Recursos Humanos",color:"#378ADD",email:"rh@mecob.com.br"},
+  {id:"samuel",name:"Samuel",dept:"Comercial",color:"#D85A30",email:"comercial1@mecob.com.br"},
+  {id:"benhur",name:"Ben-Hur",dept:"Controle Financeiro",color:"#534AB7",email:"cobranca20@mecob.com.br"},
+  {id:"rc",name:"RC",dept:"Recuperacao de Credito",color:"#0F6E56",email:"gerencia@mecob.com.br"},
+  {id:"henrique",name:"Henrique",dept:"Marketing — Planejamento",color:"#BA7517",planejamento:true},
+  {id:"luiz",name:"Luiz Carlos",dept:"Financeiro",color:"#A32D2D",email:"financeiro@mecob.com.br"}
+];
+
+/* Feedbacks editaveis — salvos por lider */
+var fbEdits={};
+function saveFbE(){apiSave("mecob_fbe",fbEdits);}
+function getFbTx(lid){
+  if(fbEdits[lid]!==undefined)return fbEdits[lid];
+  return "";
+}
+
+function gerarFeedbackIA(lid,btn){
+  var entries=gE(lid);
+  if(!entries.length)return;
+  var l=LL.find(function(x){return x.id===lid});
+  var ta=document.getElementById("fbtxt-"+lid);
+  var statusEl=document.getElementById("fb-status-"+lid);
+  if(!ta)return;
+  if(btn){btn.disabled=true;btn.textContent="Gerando...";}
+  if(statusEl)statusEl.style.display="block";
+
+  // Monta resumo de todas as semanas disponiveis
+  var semanas=entries.slice().reverse().map(function(e){
+    var sc=gs(e);
+    var linha="Semana "+e.week+" | Score: "+sc.toFixed(1)+"/5";
+    if(e.d1!==undefined)linha+=" (D1:"+e.d1+" D2:"+e.d2+" D3:"+e.d3+" D4:"+e.d4+")";
+    if(e.analysis)linha+="\n"+e.analysis;
+    if(e.text)linha+="\nTexto do relatorio:\n"+e.text.slice(0,600);
+    return linha;
+  }).join("\n\n---\n\n");
+
+  var prompt="Voce e Fernanda, gerente da MECOB.\n\nEscreva um feedback consolidado para "+l.name+" ("+l.dept+") cobrindo TODAS as "+entries.length+" semanas. O feedback deve:\n- Ser escrito em primeira pessoa\n- Citar pontos fortes de cada semana com especificidade\n- Citar pontos fracos com clareza e firmeza, sem suavizar\n- Identificar tendencias (melhora, queda, estabilidade)\n- Terminar com direcionamentos concretos para proxima semana\n- Tom direto e profissional, sem elogios genericos\n- Maximo 300 palavras\n- NAO incluir saudacao nem assinatura\n\nDados das semanas:\n\n"+semanas;
+
+  fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:600,messages:[{role:"user",content:prompt}]})
+  }).then(function(r){return r.json()}).then(function(d){
+    var texto=(d.content&&d.content[0]&&d.content[0].text)||"Erro ao gerar.";
+    ta.value=texto;
+    fbEdits[lid]=texto;
+    saveFbE();
+    if(btn){btn.disabled=false;btn.textContent="Gerar com IA";}
+    if(statusEl)statusEl.style.display="none";
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.textContent="Gerar com IA";}
+    if(statusEl)statusEl.style.display="none";
+    ta.value="Erro ao conectar com a IA.";
+  });
+}
+
+/* Alertas — anotacoes */
+var alNotes={};
+function saveAlNotes(){apiSave("mecob_al_notes",alNotes);}
+function alKey(lid,week,txt){return lid+"|"+week+"|"+txt.slice(0,40)}
+
+/* DB principal */
+function ini(n){return n.split(" ").map(function(w){return w[0]}).join("").slice(0,2).toUpperCase()}
+var db={};
+var DB_LOADED=false;
+
+function cs(d1,d2,d3,d4){return Math.round(((d1+d2+d3+d4)/4)*10)/10}
+function scC(s){return s>=4?"#2E6B3E":s>=3?"#8A6200":"#B02A2A"}
+function scBg(s){return s>=4?"#E8F3EB":s>=3?"#FDF3D9":"#FBEAEA"}
+function scCl(s){return s>=4?"pos":s>=3?"neu":"neg"}
+function gs(e){return e.d1!==undefined?cs(e.d1,e.d2,e.d3,e.d4):(e.score||0)}
+function avgS(lid){var e=gE(lid);return e.length?e.reduce(function(a,x){return a+gs(x)},0)/e.length:null}
+function trnSym(lid){var e=gE(lid);if(e.length<2)return "";var a=gs(e[0]),b=gs(e[1]);return a>b?"^":a<b?"v":"="}
+function allW(){var ws={};LL.forEach(function(l){gE(l.id).forEach(function(e){ws[e.week]=1})});return Object.keys(ws).sort().reverse()}
+function wkLbl(){var n=new Date(),s=new Date(n);s.setDate(n.getDate()-n.getDay()+1);var en=new Date(s);en.setDate(s.getDate()+6);var f=function(d){return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"})};return f(s)+" a "+f(en)}
+
+function save(){apiSave("mecob_db",db);}
+
+/* ---- API Supabase ---- */
+function apiSave(key,val){
+  fetch("/api/db",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:key,data:JSON.stringify(val)})}).catch(function(e){console.error("Erro ao salvar",key,e);});
+}
+function apiLoad(key,callback){
+  fetch("/api/db?key="+encodeURIComponent(key)).then(function(r){return r.json();}).then(function(d){try{callback(d.value?JSON.parse(d.value):null);}catch(e){callback(null);}}).catch(function(){callback(null);});
+}
+function carregarDados(callback){
+  var loaded=0,total=4;
+  function done(){loaded++;if(loaded>=total)callback();}
+  apiLoad("mecob_db",function(v){if(v)db=v;done();});
+  apiLoad("mecob_fbe",function(v){if(v)fbEdits=v;done();});
+  apiLoad("mecob_al_notes",function(v){if(v)alNotes=v;done();});
+  apiLoad("mecob_fbhist",function(v){if(v)fbHist=v;done();});
+}
+function gE(lid){return db[lid]||[]}
+
+/* Seed — dados iniciais do ciclo setembro/2026 */
+var SD=[
+  {l:"vitoria_o",e:{week:"28/08/2026 a 03/09/2026",d1:5,d2:4,d3:5,d4:5,
+    tags:["emissao","contratos","ia","cobranca","automacao"],
+    analysis:"57 emitidos R$ 1.337.398 R$ 48.265 honor. Crescimento 20,6% valor 72,7% volume. 11 estados. 21 contratos listagem zerados. 4/11 demandas. Sistema cobranca 1a parcela pronto (D-3/D-0/Atrasada, WhatsApp Business API aprovado, promessa pagamento automatica). Levantamento eventos TI em andamento.\nMelhor semana do ciclo. Sistema de cobranca estruturado completo. Relatorio com distribuicao por estado, categoria e projecao ate 2031.\n4/11 demandas apenas - 7 em aberto.",
+    kpis:{emitidos:57,valor:"R$ 1.337.398",honorarios:"R$ 48.265",ticket_medio:"R$ 23.463",estados:11,demandas:"4/11"},
+    alertas:[{tipo:"warn",txt:"7 demandas em aberto ao final da semana - Luana e Samuel com 0% de resolucao."},{tipo:"info",txt:"Levantamento de eventos incorretos para TI previsto para ter/qua da semana seguinte."}]}},
+  {l:"vitoria_o",e:{week:"04/09/2026 a 10/09/2026",d1:4,d2:3,d3:5,d4:5,
+    tags:["emissao","contratos","ia","cobranca","organizacao","larissa"],
+    analysis:"51 emitidos R$ 533.054 R$ 20.367 honor. Ticket medio R$ 10.452. 0/3 demandas. 10 pendentes. Conferencia 307 contratos: 295 corretos 12 a corrigir (96,1%) - enviada ao TI. Sistema cobranca 1a parcela: 28/29 adimplentes (96,6%). Larissa assumiu lancamento despesas pela primeira vez. Extensao boletos ainda sem funcionar.\nOrganizacao interna. Conferencia encaminhada ao TI. Sistema cobranca operando. Larissa assumiu nova funcao.\n0/3 demandas. Extensao boletos pendente. Projeto automacao demandas Larissa nao entregue.",
+    kpis:{emitidos:51,valor:"R$ 533.054",honorarios:"R$ 20.367",demandas:"0/3",adimplencia:"96,6%",eventos_corretos:"96,1%"},
+    alertas:[{tipo:"warn",txt:"Extensao de boletos da Larissa ainda sem funcionar - resolucao prevista seg/ter."},{tipo:"info",txt:"Projeto automacao de demandas (Larissa) nao entregue - aguardando semana seguinte."},{tipo:"info",txt:"12 contratos com eventos incorretos encaminhados ao TI (Alessandro) para correcao."}]}},
+  {l:"vitoria_s",e:{week:"31/08/2026 a 04/09/2026",d1:3,d2:4,d3:3,d4:3,
+    tags:["rh","recrutamento","folha","setembro-amarelo"],
+    analysis:"2 entrevistas. Valdilene (CF) avancou para teste. Supervisor RC: candidato acima da faixa salarial novamente. Vaga Financeiro Carlos Motta preenchida. Folha e ponto fechados. Feedbacks CF acompanhados. Setembro Amarelo decoracao. Presente 7 anos Luana. Sistema R&S perdeu dados por falha tecnica.\n2 entrevistas avancando. Folha fechada. Vaga financeiro preenchida.\nSupervisor RC bloqueado pela faixa salarial (padrao recorrente). Sistema R&S perdeu dados. Secao parecer em branco.",
+    kpis:{vagas_abertas:3,entrevistas:2,headcount:18},
+    alertas:[{tipo:"warn",txt:"Supervisor RC: mais um candidato acima da faixa salarial - desafio recorrente. Revisar faixa ou considerar PDI interno."},{tipo:"info",txt:"Sistema de R&S perdeu todos os dados preenchidos - seguiu manual."}]}},
+  {l:"vitoria_s",e:{week:"08/09/2026 a 11/09/2026",d1:2,d2:3,d3:2,d4:3,
+    tags:["rh","recrutamento","estagio","samuel"],
+    analysis:"0 entrevistas. Valdilene desistiu apos 1 dia de teste (aprovada em outra vaga com maior remuneracao). Jessica (RC) aguarda semana seguinte. Diagnostico de vagas e inventario nao concluidos. Ferias Esis e Larissa comunicadas. Reuniao Larissa sobre encerramento estagio e efetivacao. Viagem Vinicius G4 organizada. Material escritorio pedido. Semana curta feriado.\nFerias comunicadas. Reuniao Larissa bem conduzida. Viagem G4 organizada.\n0 entrevistas. Valdilene perdida para concorrencia. Diagnostico e inventario nao entregues. Samuel com falhas graves de comunicacao.",
+    kpis:{vagas_abertas:3,entrevistas:0,headcount:18},
+    alertas:[{tipo:"danger",txt:"Samuel/Comercial PJ: falhas graves de comunicacao persistem mesmo apos alinhamento anterior - nao avisa presenca em reunioes nem no escritorio."},{tipo:"warn",txt:"Auxiliar CF: Valdilene desistiu apos 1 dia de teste (aprovada em outra empresa com maior remuneracao)."},{tipo:"warn",txt:"Diagnostico de vagas e inventario de maquinas nao entregues na semana - adiados."}]}},
+  {l:"benhur",e:{week:"31/08/2026 a 04/09/2026",d1:4,d2:5,d3:5,d4:5,
+    tags:["financeiro","recuperacao","spc","adimplencia","ferramentas"],
+    analysis:"Taxa 28,86% maior desde abril (+11,66pp). R$ 11.389 recuperados. R$ 47.510 honor. SPC primeira reversao do ciclo: saldo -54 (87 retiradas / 33 negativacoes). Adimplencia 88,90%. Patricio 40% taxa individual. Cobranca por faixas de prazo. Nova ferramenta de estrategia.\nMelhor semana do ciclo. Taxa top-3 do ano. SPC reverteu pela 1a vez.\nEquipe registrou muitas promessas para proxima semana.",
+    kpis:{taxa_rec:"28,86%",valor_rec:"R$ 11.389",honorarios:"R$ 47.510",adimplencia:"88,90%",spc_saldo:"-54"},
+    alertas:[{tipo:"info",txt:"Equipe registrou muitas promessas para a proxima semana - monitorar convertibilidade."},{tipo:"info",txt:"SPC: primeira reversao do ciclo (-54). Confirmar se sustentavel na semana seguinte."}]}},
+  {l:"benhur",e:{week:"08/09/2026 a 11/09/2026",d1:3,d2:4,d3:4,d4:5,
+    tags:["financeiro","recuperacao","spc","novo-sistema","4-dias"],
+    analysis:"4 dias uteis. Taxa 17,13% (meta 25% deficit -7,87pp). R$ 19.103 recuperados 352/860 contratos. R$ 38.752 honor (CF 81% RC 19%). Panorama ano: R$ 3,14M recuperado / R$ 8,87M em aberto. Carteira inadimplente R$ 72.514 (R$ 51.592 ate 45 dias). Adimplencia vencimentos 73,6%. SPC 121 negativacoes / 54 exclusoes. Novo sistema em teste.\nNovo relatorio com panorama acumulado e carteira por faixa. Novo sistema implantando.\nTaxa abaixo da meta. Muita resistencia e promessas nao convertidas. Semana de 4 dias.",
+    kpis:{taxa_rec:"17,13%",valor_rec:"R$ 19.103",honorarios:"R$ 38.752",adimplencia:"73,6%",carteira_aberto:"R$ 8,87M"},
+    alertas:[{tipo:"warn",txt:"Taxa 17,13% abaixo da meta de 25% - resistencia alta e promessas nao convertidas."},{tipo:"info",txt:"Novo sistema de cobranca em fase de teste - implementar no dia a dia semana seguinte."}]}}
+,
+  {l:"luiz",e:{week:"31/08/2026 a 04/09/2026",d1:5,d2:5,d3:5,d4:5,tags:["financeiro","repasses","ia","gemini","prestacoes"],analysis:"R$ 495.978 repasses. R$ 47.511 faturamento +28,23%. 57 relatorios 0 pendentes. API Gemini integrada ao sistema de prestacoes. Modulo demandas em testes.\nFaturamento +28%. Zero pendencias. Gemini integrado.\nNenhum ponto negativo.",kpis:{repasses:"R$ 495.978",faturamento:"R$ 47.511",honorarios:"R$ 26.535",relatorios:57},alertas:[]}},
+  {l:"luiz",e:{week:"07/09/2026 a 11/09/2026",d1:5,d2:5,d3:5,d4:5,tags:["financeiro","repasses","ia","todoist","prestacoes"],analysis:"R$ 726.465 repasses (117 rep +317% qtd). R$ 38.753 faturamento +74,49% vs previsto. Gap repasse -5,58%. Hon x desp 86,11%. Reuniao Todoist 2.0. Sistema prestacoes ajustes Claude. 4 dias uteis.\nRepasses R$ 726k. Gap repasse excelente. Todoist 2.0 conduzido.\nSemana 4 dias.",kpis:{repasses:"R$ 726.465",faturamento:"R$ 38.753",honorarios:"R$ 17.102",gap_repasse:"-5,58%"},alertas:[]}},
+  {l:"ketrirrine",e:{week:"31/08/2026 a 04/09/2026",d1:3,d2:3,d3:3,d4:3,tags:["relacionamento","contratos","leilao","devolucao","repasse"],analysis:"5 contratos R$ 224.800 (Eloir R$ 209.800). 9/12 demandas. 30 clientes 2 ligacoes 0 reunioes. Devolucao Escolas Elite (inviabilidade judicial). Retorno Luana ferias estabilizou equipe. Repasses especiais em aberto.\nContratos de valor. Retorno Luana.\n3 demandas pendentes. Zero reunioes. Repasses especiais em aberto.",kpis:{contratos:5,valor:"R$ 224.800",clientes:30,demandas:"9/12"},alertas:[{tipo:"warn",txt:"Repasses de clientes especiais ainda em aberto - cobrancas recorrentes."},{tipo:"info",txt:"Devolucao Escolas Elite LTDA Me - inviabilidade judicial."}]}},
+  {l:"samuel",e:{week:"31/08/2026 a 04/09/2026",d1:4,d2:4,d3:5,d4:4,tags:["comercial","funil","nelore","prospeccao","rc"],analysis:"34/34 leads revisados zero pendencias. 1 captacao Nelore Roda Branca. 3 negociacoes RC: Syagri, Nelore RFA, Rima. 4 tarefas agendadas. Apresentacao executiva com foto do funil.\nFunil 100% atualizado. Captacao fechada. Metodologia exemplar.\n1 captacao - pipeline depende de conversao.",kpis:{leads_funil:34,captacoes:1,negociacoes_rc:3,tarefas:4},alertas:[]}},
+  {l:"samuel",e:{week:"07/09/2026 a 11/09/2026",d1:4,d2:4,d3:5,d4:5,tags:["comercial","funil","nelore","prospeccao","instagram"],analysis:"Base 34 para 80 leads (+46 Nelore). 14 leads trabalhados. Roda Branca confirmado (Ganho). 3 leads Instagram. 9 tarefas agendadas. Semana 4 dias.\nBase +135% em 1 semana. Roda Branca confirmado. Instagram gerando leads.\nAlta dependencia conversao base Nelore.",kpis:{leads_funil:80,novos_nelore:46,captacao_confirmada:1,leads_instagram:3},alertas:[{tipo:"info",txt:"Base mais que dobrou com 46 criadores Nelore - foco em conversao agora."}]}},
+  {l:"rc",e:{week:"31/08/2026 a 04/09/2026",d1:3,d2:4,d3:3,d4:4,tags:["rc","acordos","cobranca","vinicius","ariana"],analysis:"31 acordos (Vinicius 17 Ariana 14). R$ 16.361 contratados ticket R$ 527. 48 pagamentos R$ 8.345. Inadimplencia 25,2%. 1.134 cobrancas (145 ativas 989 robo).\n31 acordos. Volume robo alto. Distribuicao equilibrada.\nTaxa inadimplencia 25,2% preocupante.",kpis:{acordos:31,contratados:"R$ 16.361",recebidos:"R$ 8.345",inadimplencia:"25,2%",cobrancas:1134},alertas:[{tipo:"warn",txt:"Taxa inadimplencia 25,2% - 17 de 50 parcelas da semana nao pagas."}]}},
+  {l:"rc",e:{week:"07/09/2026 a 11/09/2026",d1:2,d2:3,d3:3,d4:4,tags:["rc","acordos","cobranca","4-dias"],analysis:"6 acordos (Vinicius 4 Ariana 2). R$ 7.362 contratados ticket R$ 1.227. 48 pagamentos R$ 6.835. Inadimplencia 31,6% (piora). 668 cobrancas. 41/73 parcelas atrasadas. Semana 4 dias.\nTicket medio alto. Volume pagamentos mantido.\nApenas 6 acordos vs 31 anterior. Inadimplencia piorou 31,6%.",kpis:{acordos:6,contratados:"R$ 7.362",recebidos:"R$ 6.835",inadimplencia:"31,6%",cobrancas:668},alertas:[{tipo:"warn",txt:"Inadimplencia piorou: 31,6% (41/73 parcelas atrasadas) vs 25,2% semana anterior."},{tipo:"warn",txt:"Apenas 6 acordos vs 31 da semana anterior - queda expressiva."}]}},
+  {l:"henrique",e:{week:"14/09/2026 a 20/09/2026",tags:["marketing","planejamento","cronograma","instagram","reels"],text:"ContentFlow 14-20/09: Seg Carrossel Caiado. Ter Carrossel Cury + Reels Vinicius. Qua Carrossel Vinicius + Carrossel Lula. Qui Frase + Carrossel Flavio Bolsonaro. Sex Reels Samuel chamada presidenciais. 7 publicacoes planejadas.",analysis:"Cronograma ContentFlow entregue 14-20/09. 7 publicacoes (5 carrosseis serie presidenciaveis, 2 Reels Vinicius e Samuel). Foco em serie presidenciaveis + conteudo interno.",alertas:[]}}
+];
+/* seed aplicado no init */
+
+var ovc=null;
+var pendingFile=null;
+var currentArq=null;
+
+/* ---- Navegacao ---- */
+function goPage(id,el){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active")});
+  document.querySelectorAll(".nb").forEach(function(b){b.classList.remove("active")});
+  document.getElementById("page-"+id).classList.add("active");
+  el.classList.add("active");
+  if(id==="overview")renderOv();
+  else if(id==="alertas")renderAl();
+  else if(id==="lideres")renderLG();
+  else if(id==="feedbacks")renderFB();
+  else if(id==="comparar"){bwSel("cmp-w");renderCmp();}
+  else if(id==="registrar")renderReg();
+  else if(id==="analise"){bwSel("an-w");renderAnalise();}
+}
+function bwSel(id){
+  document.getElementById(id).innerHTML=allW().map(function(w){return "<option value='"+w+"'>"+w+"</option>"}).join("");
+}
+
+/* ---- Zerar ---- */
+function showZerar(){
+  goPage("overview",document.querySelector(".nb.active")||document.querySelectorAll(".nb")[0]);
+  document.getElementById("confirm-box").classList.add("show");
+}
+function hideZerar(){document.getElementById("confirm-box").classList.remove("show")}
+function zerarDados(){
+  db={};
+  fbEdits={};
+  alNotes={};
+  try{
+    localStorage.removeItem("mecob_db_v3");
+    localStorage.removeItem("mecob_fbe_v4");
+    localStorage.removeItem("mecob_al_notes_v3");
+  }catch(e){}
+  hideZerar();
+  renderOv();
+  renderReg();
+  bwSel("cmp-w");
+  bwSel("an-w");
+}
+
+/* ---- Upload ---- */
+function handleFile(file){
+  if(!file)return;
+  if(file.size>5*1024*1024){alert("Arquivo muito grande. Limite: 5MB.");return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    pendingFile={name:file.name,type:file.type||"application/octet-stream",data:e.target.result};
+    var nm=document.getElementById("up-name");
+    nm.textContent="Arquivo selecionado: "+file.name;
+    nm.style.display="block";
+    document.getElementById("up-zone").style.borderColor="var(--gr)";
+    document.getElementById("up-zone").style.background="var(--gr-bg)";
+  };
+  reader.readAsDataURL(file);
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById("up-zone").classList.remove("drag");
+  if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);
+}
+
+/* ---- Modal PDF ---- */
+function openArq(lid,week){
+  var entry=(db[lid]||[]).find(function(e){return e.week===week});
+  if(!entry||!entry.arquivo){alert("Arquivo nao encontrado.");return;}
+  currentArq=entry.arquivo;
+  document.getElementById("mod-title").textContent=currentArq.name;
+  var fr=document.getElementById("mod-frame");
+  var isPdf=currentArq.type==="application/pdf"||currentArq.name.toLowerCase().endsWith(".pdf");
+  if(isPdf){
+    fr.src=currentArq.data;
+  }else{
+    fr.removeAttribute("src");
+    fr.srcdoc="<div style='font-family:sans-serif;padding:48px 32px;text-align:center;color:#555'><div style='font-size:56px;margin-bottom:16px'>D</div><div style='font-size:16px;font-weight:600;margin-bottom:8px'>"+currentArq.name+"</div><div style='font-size:14px;color:#888'>Clique em <strong>Baixar</strong> para abrir no Word.</div></div>";
+  }
+  document.getElementById("pdf-modal").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeMod(){
+  document.getElementById("pdf-modal").classList.remove("open");
+  document.getElementById("mod-frame").removeAttribute("src");
+  document.body.style.overflow="";
+  currentArq=null;
+}
+function dlArq(){
+  if(!currentArq)return;
+  var a=document.createElement("a");
+  a.href=currentArq.data;
+  a.download=currentArq.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/* ---- Salvar ---- */
+function salvar(){
+  var lid=document.getElementById("rg-l").value;
+  var l=LL.find(function(x){return x.id===lid});
+  var week=document.getElementById("rg-s").value.trim();
+  var text=document.getElementById("rg-t").value.trim();
+  var analysis=document.getElementById("rg-a").value.trim();
+  var tags=document.getElementById("rg-tg").value.trim().split(",").map(function(t){return t.trim()}).filter(Boolean);
+  var msgEl=document.getElementById("rg-m");
+  if(!text){msgEl.className="msg-err";msgEl.textContent="Cole o texto antes de salvar.";return;}
+  if(!db[lid])db[lid]=[];
+  var entry={week:week,tags:tags,analysis:analysis,text:text,alertas:[],ts:Date.now()};
+  if(!l.planejamento){
+    entry.d1=parseInt(document.getElementById("rg-d1").value);
+    entry.d2=parseInt(document.getElementById("rg-d2").value);
+    entry.d3=parseInt(document.getElementById("rg-d3").value);
+    entry.d4=parseInt(document.getElementById("rg-d4").value);
+  }
+  if(pendingFile)entry.arquivo=pendingFile;
+  db[lid].unshift(entry);
+  try{
+    save();
+  }catch(err){
+    delete entry.arquivo;
+    try{save();}catch(e2){}
+    limpar();
+    msgEl.className="msg-err";
+    msgEl.textContent="Feedback salvo, mas o arquivo nao coube no armazenamento (muito grande).";
+    return;
+  }
+  limpar();
+  var scoreStr=l.planejamento?"planejamento registrado":"Score: "+cs(entry.d1,entry.d2,entry.d3,entry.d4)+"/5";
+  msgEl.className="msg-ok";
+  msgEl.textContent=l.name+" salvo! "+scoreStr+(pendingFile?" — Arquivo anexado":"");
+  pendingFile=null;
+  setTimeout(function(){msgEl.textContent=""},5000);
+}
+function limpar(){
+  ["rg-t","rg-a","rg-tg"].forEach(function(id){document.getElementById(id).value=""});
+  document.getElementById("up-name").style.display="none";
+  document.getElementById("up-input").value="";
+  document.getElementById("up-zone").style.borderColor="";
+  document.getElementById("up-zone").style.background="";
+}
+
+/* ---- Visao geral ---- */
+function renderOv(){
+  var wd=LL.filter(function(l){return gE(l.id).length>0});
+  var miss=LL.filter(function(l){return !gE(l.id).length});
+  var pct=Math.round(wd.length/LL.length*100);
+  document.getElementById("pg").innerHTML="<div class='pg-h'><span style='font-size:14px;font-weight:500'>Cobertura de feedbacks</span><span style='font-family:var(--mono);font-size:13px;color:var(--mu)'>"+wd.length+" / "+LL.length+"</span></div><div class='pg-tr'><div class='pg-fi' style='width:"+pct+"%'></div></div><div class='pg-ms'>"+(miss.length?"Aguardando: "+miss.map(function(l){return l.name}).join(", "):"Todos os lideres registrados")+"</div>";
+  var tot=LL.reduce(function(a,l){return a+gE(l.id).length},0);
+  var allA=[];LL.forEach(function(l){gE(l.id).forEach(function(e){(e.alertas||[]).forEach(function(a){allA.push(a)})})});
+  var nd=allA.filter(function(a){return a.tipo==="danger"}).length;
+  document.getElementById("ov-m").innerHTML="<div class='mt'><div class='num'>"+wd.length+"</div><div class='lbl'>Com feedback</div></div><div class='mt'><div class='num'>"+tot+"</div><div class='lbl'>Registros</div></div><div class='mt'><div class='num'>"+allW().length+"</div><div class='lbl'>Semanas</div></div><div class='mt'><div class='num' style='color:"+(nd?"#B02A2A":"inherit")+"'>"+allA.length+"</div><div class='lbl'>Alertas</div></div>";
+  if(ovc)ovc.destroy();
+  ovc=new Chart(document.getElementById("ovc"),{type:"bar",data:{labels:LL.map(function(l){return l.name.split(" ")[0]}),datasets:[{label:"Score",data:LL.map(function(l){var s=avgS(l.id);return s?Math.round(s*10)/10:0}),backgroundColor:LL.map(function(l){return l.color+"BB"}),borderColor:LL.map(function(l){return l.color}),borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:5,ticks:{stepSize:1},grid:{color:"rgba(0,0,0,.05)"}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  document.getElementById("ov-c").innerHTML=LL.map(function(l){
+    var e=gE(l.id);var sc=avgS(l.id);var pct2=sc?Math.round(sc/5*100):0;
+    var ha=(e[0]&&e[0].alertas||[]).some(function(a){return a.tipo==="danger"});
+    var lastSc=e.length?gs(e[0]):null;
+    return "<div class='oc'><div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px'><div><div style='font-size:13px;font-weight:500'>"+l.name+" "+trnSym(l.id)+(ha?" !!":"")+"</div><div style='font-size:11px;color:var(--mu)'>"+l.dept+"</div></div><div style='width:28px;height:28px;border-radius:50%;background:"+l.color+"18;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:"+l.color+";font-family:var(--mono)'>"+ini(l.name)+"</div></div><div class='bt'><div class='bf' style='width:"+pct2+"%;background:"+(sc?scC(sc):"#ccc")+"'></div></div><div style='font-size:11px;color:var(--mu)'>"+(sc?"Media: "+sc.toFixed(1)+"/5":"sem dados")+(lastSc?" — Ultima: <strong style='color:"+scC(lastSc)+"'>"+lastSc.toFixed(1)+"</strong>":"")+" — "+e.length+" reg.</div></div>";
+  }).join("");
+}
+
+/* ---- Alertas ---- */
+function renderAl(){
+  var flat=[];
+  LL.forEach(function(l){gE(l.id).forEach(function(e){(e.alertas||[]).forEach(function(a){flat.push({leader:l,week:e.week,alerta:a})})})});
+  if(!flat.length){document.getElementById("al-c").innerHTML="<div class='emp'>Nenhum alerta identificado. Registre feedbacks e marque alertas ao salvar.</div>";return;}
+  var grp={danger:[],warn:[],info:[]};
+  flat.forEach(function(x){if(grp[x.alerta.tipo])grp[x.alerta.tipo].push(x)});
+  function rnd(items,cls,lbl){
+    if(!items.length)return "";
+    return "<div style='margin-bottom:28px'><div class='cl'>"+lbl+" ("+items.length+")</div>"+
+      items.map(function(x){
+        var k=alKey(x.leader.id,x.week,x.alerta.txt);
+        var note=alNotes[k]||"";
+        var hasNote=note.trim().length>0;
+        var safeK=k.replace(/[|]/g,"__").replace(/[^a-zA-Z0-9_]/g,"_");
+        return "<div class='al-item "+cls+"'>"+
+          "<div style='display:flex;gap:10px'><div class='dot' style='margin-top:4px'></div>"+
+          "<div style='flex:1'><div style='margin-bottom:6px'><strong>"+x.leader.name+"</strong> <span style='font-family:var(--mono);font-size:11px;color:inherit;opacity:.7;margin-left:4px'>"+x.week+"</span></div>"+
+          "<div style='font-size:13px;line-height:1.5'>"+x.alerta.txt+"</div></div></div>"+
+          "<div class='al-note-wrap'>"+
+          "<div class='al-note-hdr' onclick='toggleNote(\""+safeK+"\",\""+k+"\")'><span class='al-note-lbl' id='lbl-"+safeK+"'>"+(hasNote?"Anotacao registrada":"Adicionar explicacao, acao ou anotacao")+"</span><span class='al-note-icon' id='ico-"+safeK+"'>"+(hasNote?"v":"&rsaquo;")+"</span></div>"+
+          "<div class='al-note-body' id='aln-"+safeK+"' style='display:"+(hasNote?"block":"none")+"'>"+
+          "<textarea class='al-note-ta' placeholder='Explique a situacao, acao tomada ou encaminhamentos...' oninput='saveAlNote(\""+k+"\",\""+safeK+"\",this.value)'>"+note+"</textarea>"+
+          "<div style='display:flex;justify-content:space-between;align-items:center;margin-top:6px'><span style='font-size:11px;color:var(--mu);opacity:.7'>Salvo automaticamente</span>"+
+          "<button class='al-clear-btn' onclick='clearAlNote(\""+k+"\")'>Limpar</button></div></div></div></div>";
+      }).join("")+"</div>";
+  }
+  document.getElementById("al-c").innerHTML=rnd(grp.danger,"as","CRITICO")+rnd(grp.warn,"ws","ATENCAO")+rnd(grp.info,"is","INFORMACAO");
+}
+function toggleNote(safeK,k){
+  var body=document.getElementById("aln-"+safeK);if(!body)return;
+  var open=body.style.display==="block";
+  body.style.display=open?"none":"block";
+  var lbl=document.getElementById("lbl-"+safeK);
+  var ico=document.getElementById("ico-"+safeK);
+  var note=alNotes[k]||"";
+  if(lbl)lbl.textContent=(!open&&note.trim()?"Anotacao registrada":"Adicionar explicacao, acao ou anotacao");
+  if(ico)ico.innerHTML=open?"&rsaquo;":"v";
+  if(!open){var ta=body.querySelector("textarea");if(ta)ta.focus();}
+}
+function saveAlNote(k,safeK,val){
+  alNotes[k]=val;saveAlNotes();
+  var lbl=document.getElementById("lbl-"+safeK);
+  if(lbl)lbl.textContent=val.trim()?"Anotacao registrada":"Adicionar explicacao, acao ou anotacao";
+}
+function clearAlNote(k){delete alNotes[k];saveAlNotes();renderAl();}
+
+/* ---- Lideres ---- */
+function renderLG(){
+  document.getElementById("lgrid").innerHTML=LL.map(function(l){
+    var e=gE(l.id);var sc=avgS(l.id);
+    var b=l.planejamento
+      ?"<span class='badge bg-y'>planejamento</span>"
+      :!e.length?"<span class='badge bg-n'>sem dados</span>"
+      :sc>=4?"<span class='badge bg-g'>bom</span>":sc>=3?"<span class='badge bg-y'>atencao</span>":"<span class='badge bg-r'>baixo</span>";
+    return "<div class='lc' onclick='selL(\""+l.id+"\",this)'><div class='av' style='background:"+l.color+"18;color:"+l.color+"'>"+ini(l.name)+"</div><div style='font-size:13px;font-weight:500;margin-bottom:2px'>"+l.name+"</div><div style='font-size:11px;color:var(--mu);margin-bottom:7px'>"+l.dept+"</div>"+b+" <span style='font-size:11px;color:var(--mu)'>"+e.length+"</span></div>";
+  }).join("");
+  document.getElementById("ldet").innerHTML="";
+}
+function selL(lid,el){
+  document.querySelectorAll(".lc").forEach(function(c){c.classList.remove("sel")});el.classList.add("sel");
+  var l=LL.find(function(x){return x.id===lid});var entries=gE(lid);var sc=avgS(lid);
+  var html="<div class='card'><div class='dh'><div class='av' style='width:48px;height:48px;font-size:15px;background:"+l.color+"18;color:"+l.color+"'>"+ini(l.name)+"</div><div><div style='font-size:17px;font-weight:600'>"+l.name+"</div><div style='font-size:13px;color:var(--mu)'>"+l.dept+"</div></div>"+(sc?"<div style='margin-left:auto;font-size:28px;font-weight:700;font-family:var(--mono);color:"+scC(sc)+"'>"+sc.toFixed(1)+"<span style='font-size:14px;color:var(--mu)'>/5</span></div>":"")+"</div>";
+  if(!entries.length){html+="<div class='emp'>Nenhum feedback registrado ainda.</div></div>";}
+  else{
+    var at={};entries.forEach(function(e){(e.tags||[]).forEach(function(t){at[t]=(at[t]||0)+1})});
+    var tt=Object.keys(at).sort(function(a,b){return at[b]-at[a]}).slice(0,6);
+    if(tt.length)html+="<div class='cl'>Temas frequentes</div><div class='tl'>"+tt.map(function(t){return "<span class='tag'>"+t+" <strong>"+at[t]+"</strong></span>"}).join("")+"</div><div class='dv'></div>";
+    html+="<div class='cl'>Historico</div><div class='el'>";
+    entries.forEach(function(e){
+      var sc2=gs(e);
+      html+="<div class='ei "+scCl(sc2)+"'><div class='eh'><span style='font-size:12px;font-weight:600;font-family:var(--mono)'>Semana "+e.week+"</span><span style='font-size:13px;font-weight:700;font-family:var(--mono);color:"+scC(sc2)+"'>"+sc2.toFixed(1)+"/5</span></div>";
+      if(e.d1!==undefined&&e.d1>0){
+        html+="<div class='dm'>";
+        [["D1 Resultado",e.d1],["D2 Execucao",e.d2],["D3 Iniciativas",e.d3],["D4 Relatorio",e.d4]].forEach(function(x){
+          html+="<div class='db' style='background:"+scBg(x[1])+"'><div style='font-size:18px;font-weight:700;font-family:var(--mono);color:"+scC(x[1])+"'>"+x[1]+"</div><div style='font-size:10px;color:var(--mu);margin-top:2px'>"+x[0]+"</div></div>";
+        });
+        html+="</div>";
+      }
+      if(e.kpis)html+="<div class='kg'>"+Object.keys(e.kpis).map(function(k){return "<div class='kp'><div class='kv'>"+e.kpis[k]+"</div><div class='kl'>"+k.replace(/_/g," ")+"</div></div>"}).join("")+"</div>";
+      (e.alertas||[]).forEach(function(a){html+="<div class='"+(a.tipo==="danger"?"as":a.tipo==="warn"?"ws":"is")+"' style='margin-top:4px;font-size:12px'><div class='dot'></div><span>"+a.txt+"</span></div>"});
+      if(e.arquivo){
+        html+="<button class='doc-pill' onclick='openArq(\""+lid+"\",\""+e.week+"\")' title='Visualizar relatorio'>";
+        html+="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>";
+        html+=e.arquivo.name+"</button>";
+      }
+      if(e.analysis)html+="<div style='font-size:12px;line-height:1.55;white-space:pre-wrap;margin:6px 0'>"+e.analysis+"</div>";
+      if((e.tags||[]).length)html+="<div class='tl'>"+e.tags.map(function(t){return "<span class='tag'>"+t+"</span>"}).join("")+"</div>";
+      html+="</div>";
+    });
+    html+="</div></div>";
+  }
+  document.getElementById("ldet").innerHTML=html;
+}
+
+/* ---- Feedbacks ---- */
+function renderFB(){
+  var html=LL.map(function(l){
+    var e=gE(l.id);var lastSc=e.length?gs(e[0]):null;
+    var hasText=getFbTx(l.id).trim().length>0||e.length>0;
+    return "<button class='fb-b' onclick='showFB(\""+l.id+"\",this)'><div class='fb-av' style='background:"+l.color+"18;color:"+l.color+"'>"+ini(l.name)+"</div><div style='flex:1;min-width:0'><div style='font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+l.name+"</div><div style='font-size:11px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+l.dept+"</div></div><div style='font-size:12px;font-weight:600;font-family:var(--mono);color:"+(lastSc?scC(lastSc):"var(--mu)")+"'>"+(lastSc?lastSc.toFixed(1):"--")+"</div></button>";
+  }).join("");
+  document.getElementById("fb-l").innerHTML=html;
+  document.getElementById("fb-p").innerHTML="<div class='emp' style='margin-top:60px'>Selecione um lider para ver o feedback</div>";
+}
+/* Historico de envios */
+var fbHist={};
+function saveFbHist(){apiSave("mecob_fbhist",fbHist);}
+
+function showFB(lid,el){
+  document.querySelectorAll(".fb-b").forEach(function(b){b.classList.remove("active")});el.classList.add("active");
+  var l=LL.find(function(x){return x.id===lid});
+  var e=gE(lid);var lastSc=e.length?gs(e[0]):null;
+  var lastWeek=e.length?e[0].week:"—";
+  var hist=fbHist[lid]||[];
+  var html="<div class='fb-p'><div class='fb-ph'><div class='fb-av' style='width:40px;height:40px;font-size:13px;background:"+l.color+"18;color:"+l.color+"'>"+ini(l.name)+"</div><div><div style='font-size:16px;font-weight:600'>"+l.name+"</div><div style='font-size:12px;color:var(--mu)'>"+l.dept+"</div></div>"+(lastSc?"<div style='margin-left:auto;font-size:22px;font-weight:700;font-family:var(--mono);color:"+scC(lastSc)+"'>"+lastSc.toFixed(1)+"<span style='font-size:13px;color:var(--mu)'>/5</span></div>":"")+"</div>";
+  html+="<div style='display:inline-flex;gap:5px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:3px 12px;font-size:11px;font-family:var(--mono);color:var(--mu);margin-bottom:14px'>Semana: "+lastWeek+"</div>";
+  html+="<div class='cl'>Texto para envio</div>";
+  html+="<textarea id='fbtxt-"+lid+"' style='min-height:180px;font-size:13px;line-height:1.65' placeholder='O texto do feedback aparece aqui apos o primeiro registro ser salvo.' oninput='fbEdits[this.dataset.lid]=this.value;saveFbE()' data-lid='"+lid+"'>"+getFbTx(lid)+"</textarea>";
+  html+="<div style='margin-bottom:10px'>";
+  html+="<button class='btn' style='background:var(--sf2);font-size:12px' onclick='gerarFeedbackIA(\""+lid+"\",this)' id='fb-ia-"+lid+"'>Gerar com IA (todas as semanas)</button>";
+  html+="<span id='fb-status-"+lid+"' style='display:none;font-size:12px;color:var(--mu);margin-left:10px'>Gerando feedback consolidado...</span>";
+  html+="</div>";
+  html+="<div style='display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center'>";
+  html+="<button class='btn btnp' onclick='cpFB(\""+lid+"\")'>Copiar texto</button>";
+  html+="<button class='btn' onclick='emailFB(\""+lid+"\")'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'/><polyline points='22,6 12,13 2,6'/></svg>Abrir no Zimbra</button>";
+  html+="<button class='btn' onclick='regEnvio(\""+lid+"\")'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><polyline points='20 6 9 17 4 12'/></svg>Marcar como enviado</button>";
+  html+="<span id='fbc-"+lid+"' class='fb-cp'>Copiado!</span>";
+  html+="<span id='fbr-"+lid+"' class='fb-cp' style='color:var(--gr)'>Envio registrado!</span>";
+  html+="</div>";
+  if(hist.length){
+    html+="<div style='margin-top:20px;border-top:1px solid var(--bd);padding-top:16px'>";
+    html+="<div class='cl'>Historico de envios</div><div style='display:flex;flex-direction:column;gap:6px'>";
+    hist.slice().reverse().forEach(function(h){
+      html+="<div style='display:flex;align-items:flex-start;gap:10px;font-size:12px;padding:8px 10px;background:var(--sf2);border-radius:var(--r)'>";
+      html+="<span style='font-family:var(--mono);color:var(--gr);flex-shrink:0;margin-top:1px'>"+h.dt+"</span>";
+      html+="<span style='color:var(--tx);line-height:1.5;flex:1'>"+h.preview+"</span></div>";
+    });
+    html+="</div></div>";
+  }
+  html+="</div>";
+  document.getElementById("fb-p").innerHTML=html;
+}
+
+function cpFB(lid){
+  var ta=document.getElementById("fbtxt-"+lid);if(!ta)return;
+  navigator.clipboard.writeText(ta.value).then(function(){
+    var el=document.getElementById("fbc-"+lid);
+    if(el){el.style.display="inline";setTimeout(function(){el.style.display="none"},2500);}
+  }).catch(function(){ta.select();document.execCommand("copy")});
+}
+
+function emailFB(lid){
+  var ta=document.getElementById("fbtxt-"+lid);if(!ta)return;
+  var l=LL.find(function(x){return x.id===lid});
+  var e=gE(lid);
+  var week=e.length?e[0].week:"";
+  var para=l.email||"";
+  var hora=new Date().getHours();
+  var saudacao=hora<12?"Bom dia":hora<18?"Boa tarde":"Boa noite";
+  var nomeProrio=l.name.split(" ")[0];
+  var textoComSaudacao=saudacao+", "+nomeProrio+"!\n\n"+ta.value+"\n\nAtenciosamente,\nFernanda\nGerência — MECOB";
+  var assunto=encodeURIComponent("Feedback semanal - "+l.name+(week?" ("+week+")":""));
+  var corpo=encodeURIComponent(textoComSaudacao);
+  var zimbraUrl="https://zimbra.carlosmotta.adv.br/?view=compose&to="+encodeURIComponent(para)+"&subject="+assunto+"&body="+corpo;
+  window.open(zimbraUrl,"_blank");
+}
+function closeEmailModal(){document.getElementById("email-modal").classList.remove("open");}
+
+function regEnvio(lid){
+  var ta=document.getElementById("fbtxt-"+lid);if(!ta)return;
+  var texto=ta.value.trim();if(!texto)return;
+  var now=new Date();
+  var dt=now.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  var preview=texto.slice(0,130).replace(/\n/g," ")+(texto.length>130?"…":"");
+  if(!fbHist[lid])fbHist[lid]=[];
+  fbHist[lid].push({dt:dt,preview:preview});
+  if(fbHist[lid].length>10)fbHist[lid]=fbHist[lid].slice(-10);
+  saveFbHist();
+  var el=document.getElementById("fbr-"+lid);
+  if(el){el.style.display="inline";setTimeout(function(){el.style.display="none";var btn=document.querySelector(".fb-b.active");if(btn)showFB(lid,btn);},1800);}
+}
+/* ---- Comparar ---- */
+function renderCmp(){
+  var week=document.getElementById("cmp-w").value;if(!week)return;
+  var wd=LL.map(function(l){var e=(db[l.id]||[]).find(function(x){return x.week===week});return e?{l:l,e:e}:null}).filter(Boolean);
+  if(!wd.length){document.getElementById("cmp-c").innerHTML="<div class='emp'>Sem dados para esta semana.</div>";return;}
+  var html="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:14px'>";
+  wd.forEach(function(x){
+    var sc=gs(x.e);
+    html+="<div class='card' style='margin-bottom:0'><div style='display:flex;align-items:center;gap:9px;margin-bottom:10px'><div class='av' style='width:30px;height:30px;font-size:10px;background:"+x.l.color+"18;color:"+x.l.color+";margin-bottom:0'>"+ini(x.l.name)+"</div><div><div style='font-size:13px;font-weight:500'>"+x.l.name+"</div><div style='font-size:11px;color:var(--mu)'>"+x.l.dept+"</div></div><div style='margin-left:auto;font-size:17px;font-weight:700;font-family:var(--mono);color:"+scC(sc)+"'>"+sc.toFixed(1)+"</div></div>";
+    if(x.e.d1!==undefined&&x.e.d1>0)html+="<div style='display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px'>"+[["D1",x.e.d1],["D2",x.e.d2],["D3",x.e.d3],["D4",x.e.d4]].map(function(d){return "<div style='text-align:center;padding:4px;border-radius:6px;background:"+scBg(d[1])+"'><div style='font-size:13px;font-weight:700;font-family:var(--mono);color:"+scC(d[1])+"'>"+d[1]+"</div><div style='font-size:10px;color:var(--mu)'>"+d[0]+"</div></div>"}).join("")+"</div>";
+    html+="<div class='tl'>"+(x.e.tags||[]).map(function(t){return "<span class='tag'>"+t+"</span>"}).join("")+"</div></div>";
+  });
+  html+="</div>";
+  var miss=LL.filter(function(l){return !wd.find(function(x){return x.l.id===l.id})});
+  if(miss.length)html+="<div class='card'><div class='cl'>Sem feedback nesta semana</div><div class='tl'>"+miss.map(function(l){return "<span class='tag'>"+l.name+"</span>"}).join("")+"</div></div>";
+  document.getElementById("cmp-c").innerHTML=html;
+}
+
+/* ---- Registrar ---- */
+function renderReg(){
+  document.getElementById("rg-l").innerHTML=LL.map(function(l){
+    return "<option value='"+l.id+"'"+(l.planejamento?" data-plan='1'":"")+">"+(l.planejamento?"[Plan] ":"")+l.name+" — "+l.dept+"</option>";
+  }).join("");
+  document.getElementById("rg-s").value=wkLbl();
+  atualizaFormReg();
+}
+function atualizaFormReg(){
+  var sel=document.getElementById("rg-l");
+  if(!sel||!sel.options||sel.options.length===0)return;
+  var opt=sel.options[sel.selectedIndex];
+  var isPlan=opt&&opt.getAttribute&&opt.getAttribute("data-plan")==="1";
+  document.getElementById("scores-grid").style.display=isPlan?"none":"grid";
+  document.getElementById("rg-t-label").textContent=isPlan?"Registro de planejamento":"Texto do feedback (cole o conteudo do relatorio)";
+  document.getElementById("rg-t").placeholder=isPlan?"Cole aqui o planejamento semanal do Henrique...":"Cole aqui o conteudo extraido do arquivo...";
+}
+
+/* ---- Analise ---- */
+function renderAnalise(){
+  var week=document.getElementById("an-w").value;if(!week)return;
+  var fd=LL.map(function(l){var e=(db[l.id]||[]).find(function(x){return x.week===week});return e?{l:l,e:e}:null}).filter(Boolean);
+  var ms=LL.filter(function(l){return !(db[l.id]||[]).find(function(x){return x.week===week})});
+  var av=fd.length?fd.reduce(function(a,f){return a+gs(f.e)},0)/fd.length:0;
+  document.getElementById("an-s").innerHTML="<div style='display:flex;gap:10px;flex-wrap:wrap;margin-top:10px'><div class='mt' style='flex:1;min-width:90px'><div class='num'>"+fd.length+"</div><div class='lbl'>Com feedback</div></div><div class='mt' style='flex:1;min-width:90px'><div class='num'>"+(av?av.toFixed(1):"—")+"</div><div class='lbl'>Score medio</div></div><div class='mt' style='flex:1;min-width:90px'><div class='num'>"+ms.length+"</div><div class='lbl'>Pendentes</div></div></div>";
+  var html="";
+  if(ms.length)html+="<div class='card'><div class='cl'>Aguardando feedback</div><div class='tl'>"+ms.map(function(l){return "<span class='tag'>"+l.name+"</span>"}).join("")+"</div></div>";
+  html+="<div class='card'><div class='cl'>Analise consolidada por IA</div><div id='an-box'><div class='emp' style='padding:16px 0'>Clique em <strong>Analisar com IA</strong> para gerar o relatorio consolidado.</div></div></div>";
+  document.getElementById("an-r").innerHTML=html;
+}
+function gerarAnalise(){
+  var week=document.getElementById("an-w").value;if(!week)return;
+  var fd=LL.map(function(l){var e=(db[l.id]||[]).find(function(x){return x.week===week});return e?{l:l,e:e}:null}).filter(Boolean);
+  if(!fd.length){alert("Nenhum feedback para esta semana.");return;}
+  var box=document.getElementById("an-box");if(!box)return;
+  box.innerHTML="<div style='padding:12px 0;color:var(--mu);font-size:13px'>Gerando analise...</div>";
+  var resumo=fd.map(function(f){return f.l.name+" ("+f.l.dept+") — Score: "+gs(f.e).toFixed(1)+"/5 (D1:"+f.e.d1+" D2:"+f.e.d2+" D3:"+f.e.d3+" D4:"+f.e.d4+")\n"+(f.e.analysis||f.e.text.slice(0,300))}).join("\n\n---\n\n");
+  fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:900,messages:[{role:"user",content:"Voce e consultor de gestao da MECOB — Motta Gestao e Cobranca, empresa de gestao de recebíveis agronegocio.\n\nAnalise os feedbacks da semana "+week+" ("+fd.length+"/"+LL.length+" lideres reportaram).\n\nRubrica usada: D1=Resultado, D2=Execucao Operacional, D3=Iniciativas/Inovacao, D4=Qualidade do Relatorio (25% cada, escala 1-5).\n\n"+resumo+"\n\nGere relatorio executivo com estas secoes:\nDESTAQUES DA SEMANA\nPONTOS DE ATENCAO\nPADROES IDENTIFICADOS\nRECOMENDACOES PARA A PROXIMA SEMANA\n\nSeja direto, objetivo e pratico. Max 400 palavras."}]})}).then(function(r){return r.json()}).then(function(d){box.innerHTML="<div style='font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--tx);padding:4px 0'>"+(d.content&&d.content[0]&&d.content[0].text||"Erro ao gerar.")+"</div>"}).catch(function(){box.innerHTML="<div style='color:var(--re);font-size:13px'>Erro ao conectar com a IA. Verifique sua conexao.</div>"});
+}
+
+/* ---- Init ---- */
+(function(){
+  var ov=document.getElementById("page-overview");
+  if(ov)ov.innerHTML="<div class=\'emp\' style=\'padding:80px 20px\'>Carregando...</div>";
+  carregarDados(function(){
+    SD.forEach(function(s){
+      if(!db[s.l])db[s.l]=[];
+      if(!db[s.l].find(function(x){return x.week===s.e.week;}))db[s.l].unshift(s.e);
+    });
+    save();
+    renderOv();
+    renderReg();
+    bwSel("cmp-w");
+    bwSel("an-w");
+  });
+})();
+</script>
+</body>
+</html>
