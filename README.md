@@ -60,3 +60,4 @@ Para acessar de qualquer computador, basta abrir essa URL.
 
 No Vercel → seu projeto → **Settings** → **Domains**
 → adicione ex: `feedbacks.mecob.com.br`
+
