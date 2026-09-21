@@ -1,27 +1,24 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js')
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
+  process.env.SUPABASE_SECRET_KEY
 )
 
-export default async function handler(req, res) {
-  // CORS preflight
+module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
     return res.status(200).end()
   }
 
   res.setHeader('Access-Control-Allow-Origin', '*')
 
-  const { table, action, data, key } = req.method === 'GET'
-    ? req.query
-    : req.body
+  const key = req.method === 'GET' ? req.query.key : req.body.key
+  const data = req.body ? req.body.data : null
 
   try {
-    // GET — buscar valor por chave
     if (req.method === 'GET') {
       const { data: rows, error } = await supabase
         .from('store')
@@ -33,7 +30,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ value: rows?.value ?? null })
     }
 
-    // POST — salvar/atualizar valor
     if (req.method === 'POST') {
       const { error } = await supabase
         .from('store')
