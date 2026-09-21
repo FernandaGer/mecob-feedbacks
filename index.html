@@ -514,20 +514,14 @@ function analisarArquivo(file, dataUrl){
   var base64=dataUrl.split(",")[1];
   var mediaType=file.type||"application/pdf";
 
-  var messages=[{
-    role:"user",
-    content:[
-      {type:"text",text:"Voce e assistente de gestao da MECOB. Analise este relatorio semanal de "+l.name+" ("+l.dept+") e retorne um JSON com exatamente este formato (sem markdown, sem explicacao, so o JSON):\n{\n  \"resumo\": \"resumo executivo em 2-3 linhas\",\n  \"analise\": \"analise completa com pontos positivos e negativos separados por \\n\",\n  \"d1\": numero de 1 a 5,\n  \"d2\": numero de 1 a 5,\n  \"d3\": numero de 1 a 5,\n  \"d4\": numero de 1 a 5,\n  \"tags\": [\"tag1\",\"tag2\",\"tag3\"]\n}\n\nRubrica:\nD1 Resultado: entrega comercial/financeira/de pessoas conforme o setor\nD2 Execucao: demandas concluidas, prazos, volume operacional\nD3 Iniciativas: acoes proprias, inovacao, melhorias\nD4 Relatorio: qualidade, clareza, dados, estrutura"},
-      {type:"document",source:{type:"base64",media_type:mediaType,data:base64}}
-    ]
-  }];
+  var prompt="Voce e assistente de gestao da MECOB. Analise este relatorio semanal de "+l.name+" ("+l.dept+") e retorne um JSON com exatamente este formato (sem markdown, sem explicacao, so o JSON):\n{\n  \"resumo\": \"resumo executivo em 2-3 linhas\",\n  \"analise\": \"analise completa com pontos positivos e negativos separados por \\n\",\n  \"d1\": numero de 1 a 5,\n  \"d2\": numero de 1 a 5,\n  \"d3\": numero de 1 a 5,\n  \"d4\": numero de 1 a 5,\n  \"tags\": [\"tag1\",\"tag2\",\"tag3\"]\n}\n\nRubrica:\nD1 Resultado: entrega comercial/financeira/de pessoas conforme o setor\nD2 Execucao: demandas concluidas, prazos, volume operacional\nD3 Iniciativas: acoes proprias, inovacao, melhorias\nD4 Relatorio: qualidade, clareza, dados, estrutura";
 
-  fetch("https://api.anthropic.com/v1/messages",{
+  fetch("/api/analyze",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:800,messages:messages})
+    body:JSON.stringify({prompt:prompt,fileData:base64,mimeType:mediaType})
   }).then(function(r){return r.json();}).then(function(d){
-    var texto=(d.content&&d.content[0]&&d.content[0].text)||"";
+    var texto=d.text||"";
     try{
       // Remove possiveis backticks de markdown
       texto=texto.replace(/```json/g,"").replace(/```/g,"").trim();
