@@ -851,6 +851,9 @@ function gerarAnalise(){
       if(!db[s.l].find(function(x){return x.week===s.e.week;}))db[s.l].unshift(s.e);
     });
     save();
+    // Restaura o conteudo da pagina overview antes de renderizar
+    var ov=document.getElementById("page-overview");
+    if(ov)ov.innerHTML="<div class=\'ph\'><h1>Visao geral</h1><p id=\'ciclo-label\'>Motta Gestao e Cobranca — acompanhamento semanal dos lideres</p></div><div class=\'pg\' id=\'pg\'></div><div class=\'mr\' id=\'ov-m\'></div><div class=\'st\'>Score por lider (media historica)</div><div class=\'cw\'><canvas id=\'ovc\' role=\'img\'></canvas></div><div class=\'st\'>Resumo por lider</div><div class=\'og\' id=\'ov-c\'></div><div class=\'confirm-box\' id=\'confirm-box\'><div style=\'font-size:14px;font-weight:600;color:var(--re);margin-bottom:8px\'>Zerar todos os dados?</div><div style=\'font-size:13px;color:var(--re);margin-bottom:14px\'>Esta acao apaga todos os registros, alertas e anotacoes. Nao pode ser desfeita.</div><div style=\'display:flex;gap:8px\'><button class=\'btn btnd\' onclick=\'zerarDados()\'>Sim, zerar tudo</button><button class=\'btn\' onclick=\'hideZerar()\'>Cancelar</button></div></div>";
     renderOv();
     renderReg();
     bwSel("cmp-w");
