@@ -315,7 +315,12 @@ function getFbTx(lid){
   if(fbEdits[lid]!==undefined)return fbEdits[lid];
   // Puxa o texto salvo no registro mais recente
   var entries=gE(lid);
-  if(entries.length&&entries[0].text)return entries[0].text;
+  if(entries.length){
+    var e=entries[0];
+    // Usa text se preenchido, senao usa analysis
+    if(e.text&&e.text.trim())return e.text;
+    if(e.analysis&&e.analysis.trim())return e.analysis;
+  }
   return "";
 }
 
@@ -544,7 +549,7 @@ function analisarArquivo(file, dataUrl){
       }
       if(json.resumo){
         var tt=document.getElementById("rg-t");
-        if(tt&&!tt.value)tt.value=json.resumo;
+        if(tt)tt.value=json.resumo;
       }
       if(json.d1)document.getElementById("rg-d1").value=json.d1;
       if(json.d2)document.getElementById("rg-d2").value=json.d2;
