@@ -523,8 +523,11 @@ function analisarArquivo(file, dataUrl){
   }).then(function(r){return r.json();}).then(function(d){
     var texto=d.text||"";
     try{
-      // Remove possiveis backticks de markdown
-      texto=texto.replace(/```json/g,"").replace(/```/g,"").trim();
+      // Remove markdown e extrai JSON
+      texto=texto.replace(/```json/gi,"").replace(/```/g,"").trim();
+      // Tenta extrair JSON de dentro do texto se vier com explicacao
+      var jsonMatch=texto.match(/\{[\s\S]*\}/);
+      if(jsonMatch)texto=jsonMatch[0];
       var json=JSON.parse(texto);
 
       // Preenche os campos do formulario
