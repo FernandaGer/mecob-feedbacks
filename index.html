@@ -230,6 +230,7 @@ textarea{resize:vertical;line-height:1.5}
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn btnp" onclick="salvar()">Salvar feedback</button>
       </div>
+      <div id="rg-ia-status" style="display:none;font-size:13px;padding:10px 12px;border-radius:var(--r);background:var(--ye-bg);color:var(--ye);margin-bottom:10px"></div>
       <div id="rg-m" style="margin-top:8px"></div>
     </div>
   </div>
@@ -494,8 +495,72 @@ function handleFile(file){
     nm.style.display="block";
     document.getElementById("up-zone").style.borderColor="var(--gr)";
     document.getElementById("up-zone").style.background="var(--gr-bg)";
+    // Dispara analise por IA automaticamente
+    analisarArquivo(file, e.target.result);
   };
   reader.readAsDataURL(file);
+}
+
+function analisarArquivo(file, dataUrl){
+  var statusEl=document.getElementById("rg-ia-status");
+  if(statusEl){statusEl.style.display="block";statusEl.textContent="Lendo arquivo e gerando analise...";}
+
+  // Extrai texto do arquivo via IA (envia como base64)
+  var isPdf=file.type==="application/pdf"||file.name.toLowerCase().endsWith(".pdf");
+  var lid=document.getElementById("rg-l").value;
+  var l=LL.find(function(x){return x.id===lid;})||{name:"",dept:""};
+
+  // Monta o prompt com instrucoes de extracao
+  var base64=dataUrl.split(",")[1];
+  var mediaType=file.type||"application/pdf";
+
+  var messages=[{
+    role:"user",
+    content:[
+      {type:"text",text:"Voce e assistente de gestao da MECOB. Analise este relatorio semanal de "+l.name+" ("+l.dept+") e retorne um JSON com exatamente este formato (sem markdown, sem explicacao, so o JSON):\n{\n  \"resumo\": \"resumo executivo em 2-3 linhas\",\n  \"analise\": \"analise completa com pontos positivos e negativos separados por \\n\",\n  \"d1\": numero de 1 a 5,\n  \"d2\": numero de 1 a 5,\n  \"d3\": numero de 1 a 5,\n  \"d4\": numero de 1 a 5,\n  \"tags\": [\"tag1\",\"tag2\",\"tag3\"]\n}\n\nRubrica:\nD1 Resultado: entrega comercial/financeira/de pessoas conforme o setor\nD2 Execucao: demandas concluidas, prazos, volume operacional\nD3 Iniciativas: acoes proprias, inovacao, melhorias\nD4 Relatorio: qualidade, clareza, dados, estrutura"},
+      {type:"document",source:{type:"base64",media_type:mediaType,data:base64}}
+    ]
+  }];
+
+  fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:800,messages:messages})
+  }).then(function(r){return r.json();}).then(function(d){
+    var texto=(d.content&&d.content[0]&&d.content[0].text)||"";
+    try{
+      // Remove possiveis backticks de markdown
+      texto=texto.replace(/```json/g,"").replace(/```/g,"").trim();
+      var json=JSON.parse(texto);
+
+      // Preenche os campos do formulario
+      if(json.analise){
+        var ta=document.getElementById("rg-a");
+        if(ta)ta.value=json.analise;
+      }
+      if(json.resumo){
+        var tt=document.getElementById("rg-t");
+        if(tt&&!tt.value)tt.value=json.resumo;
+      }
+      if(json.d1)document.getElementById("rg-d1").value=json.d1;
+      if(json.d2)document.getElementById("rg-d2").value=json.d2;
+      if(json.d3)document.getElementById("rg-d3").value=json.d3;
+      if(json.d4)document.getElementById("rg-d4").value=json.d4;
+      if(json.tags&&json.tags.length){
+        var tg=document.getElementById("rg-tg");
+        if(tg)tg.value=json.tags.join(", ");
+      }
+      if(statusEl){
+        statusEl.textContent="Analise concluida! Revise os campos antes de salvar.";
+        statusEl.style.color="var(--gr)";
+        setTimeout(function(){statusEl.style.display="none";},4000);
+      }
+    }catch(err){
+      if(statusEl){statusEl.textContent="Arquivo lido mas nao foi possivel extrair os dados automaticamente. Preencha manualmente.";statusEl.style.color="var(--ye)";}
+    }
+  }).catch(function(){
+    if(statusEl){statusEl.textContent="Erro ao conectar com a IA. Preencha os campos manualmente.";statusEl.style.color="var(--re)";}
+  });
 }
 function handleDrop(e){
   e.preventDefault();
