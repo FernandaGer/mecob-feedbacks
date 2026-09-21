@@ -313,6 +313,9 @@ var fbEdits={};
 function saveFbE(){apiSave("mecob_fbe",fbEdits);}
 function getFbTx(lid){
   if(fbEdits[lid]!==undefined)return fbEdits[lid];
+  // Puxa o texto salvo no registro mais recente
+  var entries=gE(lid);
+  if(entries.length&&entries[0].text)return entries[0].text;
   return "";
 }
 
@@ -822,16 +825,48 @@ function cpFB(lid){
 function emailFB(lid){
   var ta=document.getElementById("fbtxt-"+lid);if(!ta)return;
   var l=LL.find(function(x){return x.id===lid});
-  var e=gE(lid);
-  var week=e.length?e[0].week:"";
+  var entries=gE(lid);
+  var e=entries.length?entries[0]:null;
+  var week=e?e.week:"";
   var para=l.email||"";
   var hora=new Date().getHours();
   var saudacao=hora<12?"Bom dia":hora<18?"Boa tarde":"Boa noite";
   var nomeProrio=l.name.split(" ")[0];
-  var textoComSaudacao=saudacao+", "+nomeProrio+"!\n\n"+ta.value+"\n\nAtenciosamente,\nFernanda\nGerência — MECOB";
+
+  // Monta corpo do e-mail
+  var corpo=saudacao+", "+nomeProrio+"!\n\n";
+
+  // Texto principal do feedback
+  corpo+=ta.value;
+
+  // Indicadores de desempenho
+  if(e&&e.d1!==undefined&&e.d1>0){
+    var score=cs(e.d1,e.d2,e.d3,e.d4);
+    corpo+="\n\n---\nINDICADORES DE DESEMPENHO — Semana "+week+"\n";
+    corpo+="Score geral: "+score.toFixed(1)+"/5\n";
+    corpo+="D1 Resultado: "+e.d1+"/5\n";
+    corpo+="D2 Execucao: "+e.d2+"/5\n";
+    corpo+="D3 Iniciativas: "+e.d3+"/5\n";
+    corpo+="D4 Relatorio: "+e.d4+"/5";
+    // KPIs se houver
+    if(e.kpis&&Object.keys(e.kpis).length){
+      corpo+="\n\nKPIs:\n";
+      Object.keys(e.kpis).forEach(function(k){
+        corpo+="• "+k.replace(/_/g," ")+": "+e.kpis[k]+"\n";
+      });
+    }
+    // Resumo/analise se houver
+    if(e.analysis){
+      corpo+="\n\nResumo:\n"+e.analysis;
+    }
+    corpo+="\n---";
+  }
+
+  corpo+="\n\nAtenciosamente,\nFernanda\nGerencia — MECOB";
+
   var assunto=encodeURIComponent("Feedback semanal - "+l.name+(week?" ("+week+")":""));
-  var corpo=encodeURIComponent(textoComSaudacao);
-  var zimbraUrl="https://zimbra.carlosmotta.adv.br/?view=compose&to="+encodeURIComponent(para)+"&subject="+assunto+"&body="+corpo;
+  var corpoEnc=encodeURIComponent(corpo);
+  var zimbraUrl="https://zimbra.carlosmotta.adv.br/?view=compose&to="+encodeURIComponent(para)+"&subject="+assunto+"&body="+corpoEnc;
   window.open(zimbraUrl,"_blank");
 }
 function closeEmailModal(){document.getElementById("email-modal").classList.remove("open");}
