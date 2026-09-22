@@ -265,12 +265,33 @@ function renderHist(){
     el.innerHTML="<div class='hist-empty'>Nenhum relatório enviado ainda.<br>Envie seu primeiro relatório na aba ao lado!</div>";
     return;
   }
-  el.innerHTML=entries.map(function(e){
+  el.innerHTML=entries.map(function(e,i){
     var badge=e.pendente_analise
       ?"<span class='hist-badge' style='background:var(--ye-bg);color:var(--ye)'>Aguardando análise</span>"
       :"<span class='hist-badge'>Analisado</span>";
-    return "<div class='hist-item'><div class='hist-dot'></div><div class='hist-info'><div class='hist-week'>"+e.week+"</div><div class='hist-date'>Enviado em "+(e.enviado_em||'—')+"</div></div>"+badge+"</div>";
+    return "<div class='hist-item' style='flex-wrap:wrap;gap:8px'>"+
+      "<div class='hist-dot'></div>"+
+      "<div class='hist-info'><div class='hist-week'>"+e.week+"</div><div class='hist-date'>Enviado em "+(e.enviado_em||'—')+"</div></div>"+
+      badge+
+      "<button onclick='excluirRelatorio("+i+")' style='margin-left:auto;padding:4px 10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mu);font-size:11px;cursor:pointer;font-family:var(--sans)' title='Excluir'>Excluir</button>"+
+      "</div>";
   }).join('');
+}
+
+function excluirRelatorio(idx){
+  if(!confirm('Excluir este relatório? Esta ação não pode ser desfeita.'))return;
+  if(!db[USER.leader_id])return;
+  db[USER.leader_id].splice(idx,1);
+  fetch('/api/db',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:'mecob_db',data:JSON.stringify(db)})
+  }).then(function(){
+    renderHist();
+  }).catch(function(){
+    alert('Erro ao excluir. Tente novamente.');
+    db[USER.leader_id].splice(idx,0,db[USER.leader_id][idx]);
+  });
 }
 
 function renderFb(){
