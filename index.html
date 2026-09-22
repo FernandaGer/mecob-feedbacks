@@ -451,6 +451,27 @@ var ovc=null;
 var pendingFile=null;
 var currentArq=null;
 
+/* ---- Auth ---- */
+(function(){
+  var token=localStorage.getItem('mecob_token');
+  if(!token){window.location.href='/login.html';return;}
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify',token:token})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d.user){localStorage.removeItem('mecob_token');window.location.href='/login.html';return;}
+    if(d.user.role!=='admin'){window.location.href='/funcionario.html';return;}
+    // Adiciona botao de sair
+    var sair=document.createElement('button');
+    sair.textContent='Sair';
+    sair.style.cssText='position:fixed;bottom:16px;left:16px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;font-family:Inter,sans-serif;z-index:999';
+    sair.onclick=function(){
+      fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout',token:token})});
+      localStorage.removeItem('mecob_token');localStorage.removeItem('mecob_user');
+      window.location.href='/login.html';
+    };
+    document.body.appendChild(sair);
+  }).catch(function(){window.location.href='/login.html';});
+})();
+
 /* ---- Navegacao ---- */
 function goPage(id,el){
   document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active")});
