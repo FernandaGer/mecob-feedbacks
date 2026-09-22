@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MECOB — Minha Área</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#F5F3EF;--sf:#FFF;--sf2:#EDEBE6;--bd:#E0DDD6;--bd2:#CCCAB8;--tx:#1C1B18;--mu:#7A7870;--fa:#B8B5AE;--gr:#2E6B3E;--gr-bg:#E8F3EB;--ye:#8A6200;--ye-bg:#FDF3D9;--re:#B02A2A;--re-bg:#FBEAEA;--r:10px;--rl:16px;--sans:'Inter',sans-serif;--mono:'DM Mono',monospace;--sh:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100vh;font-size:15px;line-height:1.6}
+.topbar{background:#1C1B18;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--mono);font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.1em}
+.user-info{display:flex;align-items:center;gap:12px}
+.user-name{font-size:13px;color:rgba(255,255,255,.7)}
+.btn-sair{padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.btn-sair:hover{border-color:rgba(255,255,255,.3);color:#fff}
+.main{max-width:720px;margin:0 auto;padding:32px 20px}
+.tabs{display:flex;gap:4px;background:var(--sf2);border-radius:var(--rl);padding:4px;margin-bottom:24px;border:1px solid var(--bd)}
+.tab{flex:1;padding:9px;border-radius:var(--r);border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);color:var(--mu);transition:all .15s;text-align:center}
+.tab.active{background:var(--sf);color:var(--tx);box-shadow:var(--sh)}
+.page{display:none}.page.active{display:block}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:22px;margin-bottom:14px;box-shadow:var(--sh)}
+.cl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);display:block;margin-bottom:10px}
+.st{font-size:16px;font-weight:600;margin-bottom:16px}
+.fl{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);display:block;margin-bottom:6px}
+.fr{margin-bottom:14px}
+select,input[type=text],textarea{width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--bd);border-radius:var(--r);background:var(--sf2);color:var(--tx);font-family:var(--sans);outline:none;transition:border-color .15s}
+select:focus,input:focus,textarea:focus{border-color:var(--tx)}
+textarea{resize:vertical;line-height:1.5}
+.btn{padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);border:1px solid var(--bd);background:transparent;color:var(--tx);transition:all .15s}
+.btn:hover{background:var(--sf2)}
+.btnp{background:var(--tx);color:#fff;border-color:transparent}
+.btnp:hover{background:#333}
+.msg-ok{margin-top:10px;font-size:13px;padding:8px 12px;border-radius:var(--r);background:var(--gr-bg);color:var(--gr)}
+.msg-err{margin-top:10px;font-size:13px;padding:8px 12px;border-radius:var(--r);background:var(--re-bg);color:var(--re)}
+.score-big{font-size:42px;font-weight:700;font-family:var(--mono);letter-spacing:-.02em}
+.sc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.sc-item{text-align:center;padding:10px 8px;border-radius:var(--r);background:var(--sf2);border:1px solid var(--bd)}
+.sc-num{font-size:20px;font-weight:700;font-family:var(--mono)}
+.sc-lbl{font-size:10px;color:var(--mu);margin-top:2px}
+.hist-item{background:var(--sf2);border-radius:var(--r);padding:14px;margin-bottom:10px;border-left:3px solid var(--bd2)}
+.hist-item.pos{border-left-color:var(--gr)}.hist-item.neu{border-left-color:var(--ye)}.hist-item.neg{border-left-color:var(--re)}
+.hist-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.badge{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:20px}
+.bg-g{background:var(--gr-bg);color:var(--gr)}.bg-y{background:var(--ye-bg);color:var(--ye)}.bg-r{background:var(--re-bg);color:var(--re)}
+.fb-item{background:var(--sf2);border-radius:var(--r);padding:14px;margin-bottom:10px;font-size:13px;line-height:1.65}
+.fb-date{font-family:var(--mono);font-size:11px;color:var(--mu);margin-bottom:8px}
+.up-zone{border:2px dashed var(--bd2);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--sf2);margin-bottom:14px}
+.up-zone:hover{border-color:var(--gr);background:var(--gr-bg)}
+.up-zone input[type=file]{display:none}
+.up-name{font-size:12px;color:var(--gr);font-weight:500;margin-top:6px;font-family:var(--mono);display:none}
+.ia-status{display:none;font-size:13px;padding:10px 12px;border-radius:var(--r);background:var(--ye-bg);color:var(--ye);margin-bottom:10px}
+.emp{text-align:center;padding:40px 20px;color:var(--mu);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">MECOB</div>
+  <div class="user-info">
+    <span class="user-name" id="top-name">—</span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="goTab('registrar',this)">Registrar</button>
+    <button class="tab" onclick="goTab('historico',this)">Meu histórico</button>
+    <button class="tab" onclick="goTab('feedbacks',this)">Feedbacks recebidos</button>
+  </div>
+
+  <!-- REGISTRAR -->
+  <div class="page active" id="page-registrar">
+    <div class="card">
+      <div class="st">Registrar relatório semanal</div>
+      <div class="fr">
+        <label class="fl">Arquivo (PDF ou DOCX)</label>
+        <div class="up-zone" id="up-zone" onclick="document.getElementById('up-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+          <input type="file" id="up-input" accept=".pdf,.docx,.doc" onchange="handleFile(this.files[0])"/>
+          <div style="font-size:13px;color:var(--mu)">Clique ou arraste o arquivo aqui</div>
+          <div style="font-size:11px;color:var(--fa);margin-top:2px">PDF ou DOCX — até 5MB</div>
+          <div class="up-name" id="up-name"></div>
+        </div>
+      </div>
+      <div class="fr"><label class="fl">Semana de referência</label><input type="text" id="rg-s" placeholder="ex: 15/09/2026 a 19/09/2026"/></div>
+      <div class="ia-status" id="ia-status">Analisando arquivo com IA...</div>
+      <div id="scores-wrap" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px">
+        <div><label class="fl">D1 — Resultado</label><select id="rg-d1"><option value="5">5 — Excelente</option><option value="4">4 — Bom</option><option value="3" selected>3 — Regular</option><option value="2">2 — Abaixo</option><option value="1">1 — Crítico</option></select></div>
+        <div><label class="fl">D2 — Execução</label><select id="rg-d2"><option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div><label class="fl">D3 — Iniciativas</label><select id="rg-d3"><option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div><label class="fl">D4 — Relatório</label><select id="rg-d4"><option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option></select></div>
+      </div>
+      <div class="fr"><label class="fl">Texto do relatório / resumo</label><textarea id="rg-t" style="min-height:120px" placeholder="Resuma os principais pontos da semana..."></textarea></div>
+      <div class="fr"><label class="fl">Análise / observações</label><textarea id="rg-a" style="min-height:70px" placeholder="Pontos positivos, dificuldades, plano..."></textarea></div>
+      <div class="fr"><label class="fl">Temas (separados por vírgula)</label><input type="text" id="rg-tg" placeholder="ex: comercial, cobrança, ia"/></div>
+      <button class="btn btnp" onclick="salvar()">Salvar relatório</button>
+      <div id="rg-msg" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- HISTORICO -->
+  <div class="page" id="page-historico">
+    <div id="hist-c"><div class="emp">Carregando...</div></div>
+  </div>
+
+  <!-- FEEDBACKS -->
+  <div class="page" id="page-feedbacks">
+    <div id="fb-c"><div class="emp">Carregando...</div></div>
+  </div>
+</div>
+
+<script>
+var USER=null;
+var db={};
+var fbHist={};
+
+// Verifica autenticacao
+var token=localStorage.getItem('mecob_token');
+if(!token){window.location.href='/login.html';}
+else{
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify',token:token})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d.user){localStorage.removeItem('mecob_token');window.location.href='/login.html';return;}
+    if(d.user.role==='admin'){window.location.href='/index.html';return;}
+    USER=d.user;
+    document.getElementById('top-name').textContent=USER.name;
+    // Preenche semana atual
+    var n=new Date(),s=new Date(n);
+    s.setDate(n.getDate()-n.getDay()+1);
+    var en=new Date(s);en.setDate(s.getDate()+6);
+    var f=function(d){return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});};
+    document.getElementById('rg-s').value=f(s)+' a '+f(en);
+    // Carrega dados
+    carregarDados();
+  }).catch(function(){window.location.href='/login.html';});
+}
+
+function sair(){
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout',token:token})});
+  localStorage.removeItem('mecob_token');localStorage.removeItem('mecob_user');
+  window.location.href='/login.html';
+}
+
+function goTab(id,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('page-'+id).classList.add('active');
+  if(id==='historico')renderHist();
+  if(id==='feedbacks')renderFb();
+}
+
+function carregarDados(){
+  fetch('/api/db?key=mecob_db').then(function(r){return r.json();}).then(function(d){
+    if(d.value){try{db=JSON.parse(d.value);}catch(e){}}
+  });
+  fetch('/api/db?key=mecob_fbhist').then(function(r){return r.json();}).then(function(d){
+    if(d.value){try{fbHist=JSON.parse(d.value);}catch(e){}}
+  });
+}
+
+function gE(){if(!USER)return[];return(db[USER.leader_id]||[]);}
+function gs(e){return e.d1!==undefined?Math.round(((e.d1+e.d2+e.d3+e.d4)/4)*10)/10:(e.score||0);}
+function scC(s){return s>=4?'var(--gr)':s>=3?'var(--ye)':'var(--re)';}
+function scCl(s){return s>=4?'pos':s>=3?'neu':'neg';}
+
+// Upload
+var pendingFile=null;
+function handleFile(file){
+  if(!file)return;
+  if(file.size>5*1024*1024){alert('Arquivo muito grande. Limite: 5MB.');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    pendingFile={name:file.name,type:file.type||'application/pdf',data:e.target.result};
+    var nm=document.getElementById('up-name');
+    nm.textContent='Arquivo: '+file.name;nm.style.display='block';
+    document.getElementById('up-zone').style.borderColor='var(--gr)';
+    document.getElementById('up-zone').style.background='var(--gr-bg)';
+    analisarArquivo(file,e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('up-zone').classList.remove('drag');
+  if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);
+}
+
+function analisarArquivo(file,dataUrl){
+  var st=document.getElementById('ia-status');
+  st.style.display='block';st.textContent='Analisando com IA...';st.style.color='var(--ye)';
+  var base64=dataUrl.split(',')[1];
+  var liderNome=USER?USER.name:'';
+  var prompt='Voce e assistente de gestao da MECOB. Analise este relatorio semanal de '+liderNome+' e retorne um JSON com exatamente este formato (sem markdown, so o JSON):\n{"resumo": "resumo em 2-3 linhas","analise": "pontos positivos e negativos","d1": numero 1-5,"d2": numero 1-5,"d3": numero 1-5,"d4": numero 1-5,"tags": ["tag1","tag2"]}\nRubrica: D1=Resultado, D2=Execucao, D3=Iniciativas, D4=Qualidade do relatorio';
+  fetch('/api/analyze',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt:prompt,fileData:base64,mimeType:file.type||'application/pdf'})
+  }).then(function(r){return r.json();}).then(function(d){
+    var texto=d.text||'';
+    try{
+      texto=texto.replace(/```json/gi,'').replace(/```/g,'').trim();
+      if(texto.startsWith('"')&&texto.endsWith('"')){try{texto=JSON.parse(texto);}catch(e2){}}
+      var m=texto.match(/\{[\s\S]*\}/);if(m)texto=m[0];
+      var json=JSON.parse(texto);
+      if(json.resumo){var t=document.getElementById('rg-t');if(t)t.value=json.resumo;}
+      if(json.analise){var a=document.getElementById('rg-a');if(a)a.value=json.analise;}
+      if(json.d1)document.getElementById('rg-d1').value=json.d1;
+      if(json.d2)document.getElementById('rg-d2').value=json.d2;
+      if(json.d3)document.getElementById('rg-d3').value=json.d3;
+      if(json.d4)document.getElementById('rg-d4').value=json.d4;
+      if(json.tags&&json.tags.length){var tg=document.getElementById('rg-tg');if(tg)tg.value=json.tags.join(', ');}
+      st.textContent='Análise concluída! Revise antes de salvar.';st.style.color='var(--gr)';
+      setTimeout(function(){st.style.display='none';},4000);
+    }catch(err){
+      st.textContent='Arquivo lido — preencha os campos manualmente.';st.style.color='var(--ye)';
+    }
+  }).catch(function(){
+    st.textContent='Erro ao analisar. Preencha manualmente.';st.style.color='var(--re)';
+  });
+}
+
+function salvar(){
+  if(!USER)return;
+  var week=document.getElementById('rg-s').value.trim();
+  var text=document.getElementById('rg-t').value.trim();
+  var analysis=document.getElementById('rg-a').value.trim();
+  var tags=document.getElementById('rg-tg').value.trim().split(',').map(function(t){return t.trim();}).filter(Boolean);
+  var d1=parseInt(document.getElementById('rg-d1').value);
+  var d2=parseInt(document.getElementById('rg-d2').value);
+  var d3=parseInt(document.getElementById('rg-d3').value);
+  var d4=parseInt(document.getElementById('rg-d4').value);
+  var msg=document.getElementById('rg-msg');
+
+  if(!text){msg.className='msg-err';msg.textContent='Preencha o texto do relatório.';return;}
+
+  if(!db[USER.leader_id])db[USER.leader_id]=[];
+  var entry={week:week,d1:d1,d2:d2,d3:d3,d4:d4,tags:tags,analysis:analysis,text:text,alertas:[],ts:Date.now()};
+  if(pendingFile)entry.arquivo=pendingFile;
+  db[USER.leader_id].unshift(entry);
+
+  fetch('/api/db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'mecob_db',data:JSON.stringify(db)})})
+  .then(function(){
+    var sc=Math.round(((d1+d2+d3+d4)/4)*10)/10;
+    msg.className='msg-ok';
+    msg.textContent='Relatório salvo! Score: '+sc+'/5';
+    pendingFile=null;
+    document.getElementById('up-name').style.display='none';
+    document.getElementById('up-input').value='';
+    document.getElementById('up-zone').style.borderColor='';
+    document.getElementById('up-zone').style.background='';
+    document.getElementById('rg-t').value='';
+    document.getElementById('rg-a').value='';
+    document.getElementById('rg-tg').value='';
+    setTimeout(function(){msg.textContent='';},5000);
+  }).catch(function(){
+    msg.className='msg-err';msg.textContent='Erro ao salvar. Tente novamente.';
+  });
+}
+
+function renderHist(){
+  var entries=gE();
+  var el=document.getElementById('hist-c');
+  if(!entries.length){el.innerHTML="<div class='emp'>Nenhum registro ainda. Envie seu primeiro relatório!</div>";return;}
+  var avgscore=entries.reduce(function(a,e){return a+gs(e);},0)/entries.length;
+  var html="<div class='card'><div style='display:flex;align-items:center;gap:16px;margin-bottom:16px'>";
+  html+="<div><div class='cl'>Score médio</div><div class='score-big' style='color:"+scC(avgscore)+"'>"+avgscore.toFixed(1)+"<span style='font-size:18px;color:var(--mu)'>/5</span></div></div>";
+  html+="<div style='flex:1'><div class='cl'>"+entries.length+" semanas registradas</div>";
+  html+="<div style='font-size:12px;color:var(--mu)'>Última: "+entries[0].week+"</div></div></div></div>";
+  html+=entries.map(function(e){
+    var sc=gs(e);
+    return "<div class='hist-item "+scCl(sc)+"'><div class='hist-h'><span style='font-size:13px;font-weight:600;font-family:var(--mono)'>"+e.week+"</span><span class='badge "+(sc>=4?'bg-g':sc>=3?'bg-y':'bg-r')+"'>"+sc.toFixed(1)+"/5</span></div>"+
+    (e.d1!==undefined?"<div class='sc-grid'><div class='sc-item'><div class='sc-num' style='color:"+scC(e.d1)+"'>"+e.d1+"</div><div class='sc-lbl'>D1 Resultado</div></div><div class='sc-item'><div class='sc-num' style='color:"+scC(e.d2)+"'>"+e.d2+"</div><div class='sc-lbl'>D2 Execução</div></div><div class='sc-item'><div class='sc-num' style='color:"+scC(e.d3)+"'>"+e.d3+"</div><div class='sc-lbl'>D3 Iniciativas</div></div><div class='sc-item'><div class='sc-num' style='color:"+scC(e.d4)+"'>"+e.d4+"</div><div class='sc-lbl'>D4 Relatório</div></div></div>":"")+
+    (e.analysis?"<div style='font-size:12px;line-height:1.6;color:var(--mu);margin-top:6px'>"+e.analysis.slice(0,200)+(e.analysis.length>200?'...':'')+"</div>":"")+
+    "</div>";
+  }).join('');
+  el.innerHTML=html;
+}
+
+function renderFb(){
+  if(!USER)return;
+  var hist=fbHist[USER.leader_id]||[];
+  var el=document.getElementById('fb-c');
+  if(!hist.length){el.innerHTML="<div class='emp'>Nenhum feedback recebido ainda.</div>";return;}
+  var html="<div class='cl'>"+hist.length+" feedback(s) recebido(s)</div>";
+  html+=hist.slice().reverse().map(function(h){
+    return "<div class='fb-item'><div class='fb-date'>"+h.dt+"</div><div style='white-space:pre-wrap'>"+h.preview+"</div></div>";
+  }).join('');
+  el.innerHTML="<div class='card'>"+html+"</div>";
+}
+</script>
+</body>
+</html>
