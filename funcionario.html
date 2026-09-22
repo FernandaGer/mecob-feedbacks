@@ -273,7 +273,7 @@ function renderHist(){
       "<div class='hist-dot'></div>"+
       "<div class='hist-info'><div class='hist-week'>"+e.week+"</div><div class='hist-date'>Enviado em "+(e.enviado_em||'—')+"</div></div>"+
       badge+
-      "<button onclick='excluirRelatorio("+i+")' style='margin-left:auto;padding:4px 10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mu);font-size:11px;cursor:pointer;font-family:var(--sans)' title='Excluir'>Excluir</button>"+
+      (e.pendente_analise?"<button onclick='excluirRelatorio("+i+")' style='margin-left:auto;padding:4px 10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mu);font-size:11px;cursor:pointer;font-family:var(--sans)' title='Excluir'>Excluir</button>":"")+
       "</div>";
   }).join('');
 }
