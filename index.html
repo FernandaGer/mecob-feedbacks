@@ -800,6 +800,7 @@ function showFB(lid,el){
   html+="</div>";
   html+="<div style='display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center'>";
   html+="<button class='btn btnp' onclick='cpFB(\""+lid+"\")'>Copiar texto</button>";
+  html+="<span id='fb-zimbra-aviso-"+lid+"' style='display:none;font-size:12px;color:var(--gr);padding:4px 10px;background:var(--gr-bg);border-radius:var(--r)'>Texto copiado! Cole com Ctrl+V no corpo do e-mail.</span>";
   html+="<button class='btn' onclick='emailFB(\""+lid+"\")'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'/><polyline points='22,6 12,13 2,6'/></svg>Abrir no Zimbra</button>";
   html+="<button class='btn' onclick='regEnvio(\""+lid+"\")'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><polyline points='20 6 9 17 4 12'/></svg>Marcar como enviado</button>";
   html+="<span id='fbc-"+lid+"' class='fb-cp'>Copiado!</span>";
@@ -838,23 +839,37 @@ function emailFB(lid){
   var saudacao=hora<12?"Bom dia":hora<18?"Boa tarde":"Boa noite";
   var nomeProrio=l.name.split(" ")[0];
 
-  // Monta corpo do e-mail — limitado para nao exceder URL
-  var textoFeedback=ta.value.slice(0,1500);
+  // Monta corpo do e-mail completo
+  var textoFeedback=ta.value;
   var corpo=saudacao+", "+nomeProrio+"!\n\n"+textoFeedback;
 
-  // Indicadores de desempenho
   if(e&&e.d1!==undefined&&e.d1>0){
     var score=cs(e.d1,e.d2,e.d3,e.d4);
     corpo+="\n\n---\nINDICADORES — Semana "+week+"\n";
     corpo+="Score: "+score.toFixed(1)+"/5 | D1:"+e.d1+" D2:"+e.d2+" D3:"+e.d3+" D4:"+e.d4;
+    if(e.kpis&&Object.keys(e.kpis).length){
+      corpo+="\n";
+      Object.keys(e.kpis).forEach(function(k){corpo+="• "+k.replace(/_/g," ")+": "+e.kpis[k]+"\n";});
+    }
+    corpo+="---";
   }
 
   corpo+="\n\nAtenciosamente,\nFernanda\nGerencia — MECOB";
 
-  var assunto=encodeURIComponent("Feedback semanal - "+l.name+(week?" ("+week+")":""));
-  var corpoEnc=encodeURIComponent(corpo);
-  var zimbraUrl="https://zimbra.carlosmotta.adv.br/?view=compose&to="+encodeURIComponent(para)+"&subject="+assunto+"&body="+corpoEnc;
-  window.open(zimbraUrl,"_blank");
+  // Copia para clipboard e abre Zimbra so com assunto e destinatario
+  navigator.clipboard.writeText(corpo).then(function(){
+    var assunto=encodeURIComponent("Feedback semanal - "+l.name+(week?" ("+week+")":""));
+    var zimbraUrl="https://zimbra.carlosmotta.adv.br/?view=compose&to="+encodeURIComponent(para)+"&subject="+assunto;
+    window.open(zimbraUrl,"_blank");
+    // Mostra aviso para colar
+    var aviso=document.getElementById("fb-zimbra-aviso-"+lid);
+    if(aviso){aviso.style.display="inline";setTimeout(function(){aviso.style.display="none";},8000);}
+  }).catch(function(){
+    // Fallback: abre Zimbra sem corpo
+    var assunto=encodeURIComponent("Feedback semanal - "+l.name+(week?" ("+week+")":""));
+    var zimbraUrl="https://zimbra.carlosmotta.adv.br/?view=compose&to="+encodeURIComponent(para)+"&subject="+assunto;
+    window.open(zimbraUrl,"_blank");
+  });
 }
 function closeEmailModal(){document.getElementById("email-modal").classList.remove("open");}
 
