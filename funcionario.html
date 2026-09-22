@@ -283,26 +283,46 @@ function renderFb(){
   }
   el.innerHTML=hist.slice().reverse().map(function(h,i){
     var idx=hist.length-1-i;
-    return "<div class='fb-item' onclick='toggleFb("+idx+",this)' style='cursor:pointer'>"+
-      "<div style='display:flex;justify-content:space-between;align-items:center'>"+
+    var preview=(h.preview||h.full||'').slice(0,100)+'...';
+    return "<div class='fb-item' onclick='openFbModal("+idx+")' style='cursor:pointer'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px'>"+
       "<div class='fb-date' style='margin-bottom:0'>"+h.dt+"</div>"+
-      "<span style='font-size:11px;color:var(--mu);font-family:var(--mono)' id='fb-toggle-"+idx+"'>ver &rsaquo;</span>"+
+      "<span style='font-size:11px;color:var(--mu);font-family:var(--mono)'>abrir &rsaquo;</span>"+
       "</div>"+
-      "<div class='fb-preview' style='font-size:13px;color:var(--mu);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+((h.preview||h.full||'').slice(0,80))+"...</div>"+
-      "<div class='fb-full' id='fb-full-"+idx+"' style='display:none;margin-top:12px;font-size:13px;line-height:1.75;white-space:pre-wrap;border-top:1px solid var(--bd);padding-top:12px'>"+(h.full||h.preview||'Feedback sem conteúdo registrado.')+"</div>"+
+      "<div style='font-size:13px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+preview+"</div>"+
       "</div>";
   }).join('');
 }
 
-function toggleFb(idx,el){
-  var full=document.getElementById('fb-full-'+idx);
-  var toggle=document.getElementById('fb-toggle-'+idx);
-  var preview=el.querySelector('.fb-preview');
-  var open=full.style.display==='block';
-  full.style.display=open?'none':'block';
-  preview.style.display=open?'block':'none';
-  toggle.innerHTML=open?'ver &rsaquo;':'fechar &times;';
+var fbHistCache=[];
+function openFbModal(idx){
+  if(!USER)return;
+  var hist=(fbHist[USER.leader_id]||[]).slice().reverse();
+  var h=hist[idx];
+  if(!h)return;
+  document.getElementById('fb-modal-date').textContent=h.dt;
+  document.getElementById('fb-modal-text').textContent=h.full||h.preview||'Feedback sem conteúdo registrado.';
+  var modal=document.getElementById('fb-modal');
+  modal.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeFbModal(){
+  document.getElementById('fb-modal').style.display='none';
+  document.body.style.overflow='';
 }
 </script>
+
+<!-- Modal feedback completo -->
+<div id="fb-modal" onclick="if(event.target===this)closeFbModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.3)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);flex-shrink:0">
+      <span id="fb-modal-date" style="font-family:var(--mono);font-size:12px;color:var(--mu)"></span>
+      <button onclick="closeFbModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mu);line-height:1;padding:4px">×</button>
+    </div>
+    <div style="padding:20px 24px;overflow-y:auto;flex:1">
+      <div id="fb-modal-text" style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--tx)"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
