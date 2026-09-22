@@ -382,6 +382,7 @@ function gs(e){return e.d1!==undefined?cs(e.d1,e.d2,e.d3,e.d4):(e.score||0)}
 function avgS(lid){var e=gE(lid);return e.length?e.reduce(function(a,x){return a+gs(x)},0)/e.length:null}
 function trnSym(lid){var e=gE(lid);if(e.length<2)return "";var a=gs(e[0]),b=gs(e[1]);return a>b?"^":a<b?"v":"="}
 function allW(){var ws={};LL.forEach(function(l){gE(l.id).forEach(function(e){ws[e.week]=1})});return Object.keys(ws).sort().reverse()}
+function cicloW(){var ws={};LL.forEach(function(l){gE(l.id).forEach(function(e){ws[e.week]=(ws[e.week]||0)+1;})});return Object.keys(ws).filter(function(w){return ws[w]>=3;}).length||allW().length;}
 function wkLbl(){var n=new Date(),s=new Date(n);s.setDate(n.getDate()-n.getDay()+1);var en=new Date(s);en.setDate(s.getDate()+6);var f=function(d){return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"})};return f(s)+" a "+f(en)}
 
 function save(){apiSave("mecob_db",db);}
@@ -695,7 +696,7 @@ function renderOv(){
   var tot=LL.reduce(function(a,l){return a+gE(l.id).length},0);
   var allA=[];LL.forEach(function(l){gE(l.id).forEach(function(e){(e.alertas||[]).forEach(function(a){allA.push(a)})})});
   var nd=allA.filter(function(a){return a.tipo==="danger"}).length;
-  document.getElementById("ov-m").innerHTML="<div class='mt'><div class='num'>"+wd.length+"</div><div class='lbl'>Com feedback</div></div><div class='mt'><div class='num'>"+tot+"</div><div class='lbl'>Registros</div></div><div class='mt'><div class='num'>"+allW().length+"</div><div class='lbl'>Semanas</div></div><div class='mt'><div class='num' style='color:"+(nd?"#B02A2A":"inherit")+"'>"+allA.length+"</div><div class='lbl'>Alertas</div></div>";
+  document.getElementById("ov-m").innerHTML="<div class='mt'><div class='num'>"+wd.length+"</div><div class='lbl'>Com feedback</div></div><div class='mt'><div class='num'>"+tot+"</div><div class='lbl'>Registros</div></div><div class='mt'><div class='num'>"+cicloW()+"</div><div class='lbl'>Semanas no ciclo</div></div><div class='mt'><div class='num' style='color:"+(nd?"#B02A2A":"inherit")+"'>"+allA.length+"</div><div class='lbl'>Alertas</div></div>";
   if(ovc)ovc.destroy();
   ovc=new Chart(document.getElementById("ovc"),{type:"bar",data:{labels:LL.map(function(l){return l.name.split(" ")[0]}),datasets:[{label:"Score",data:LL.map(function(l){var s=avgS(l.id);return s?Math.round(s*10)/10:0}),backgroundColor:LL.map(function(l){return l.color+"BB"}),borderColor:LL.map(function(l){return l.color}),borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:5,ticks:{stepSize:1},grid:{color:"rgba(0,0,0,.05)"}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
   document.getElementById("ov-c").innerHTML=LL.map(function(l){
