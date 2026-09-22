@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MECOB — Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0F0F0E;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{width:100%;max-width:380px}
+.logo-area{text-align:center;margin-bottom:40px}
+.logo-title{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:#fff;letter-spacing:.08em}
+.logo-sub{font-size:12px;color:rgba(255,255,255,.35);margin-top:6px;letter-spacing:.06em}
+.card{background:#1A1A18;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px}
+.card-title{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:24px;text-align:center;letter-spacing:.04em}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:rgba(255,255,255,.4);margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase}
+.field input{width:100%;padding:11px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s}
+.field input:focus{border-color:rgba(255,255,255,.3)}
+.field input::placeholder{color:rgba(255,255,255,.2)}
+.btn-login{width:100%;padding:12px;background:#fff;color:#0F0F0E;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;transition:opacity .15s}
+.btn-login:hover{opacity:.9}
+.btn-login:disabled{opacity:.5;cursor:not-allowed}
+.erro{font-size:13px;color:#F87171;text-align:center;margin-top:14px;display:none}
+.footer{text-align:center;margin-top:24px;font-size:11px;color:rgba(255,255,255,.2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo-area">
+    <div class="logo-title">MECOB</div>
+    <div class="logo-sub">Motta Gestão & Cobrança</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Acesso ao sistema</div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="email" placeholder="seu@email.com" autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn-login" id="btn-login" onclick="entrar()">Entrar</button>
+    <div class="erro" id="erro"></div>
+  </div>
+  <div class="footer">Sistema interno MECOB · Acesso restrito</div>
+</div>
+<script>
+// Verifica se ja tem sessao
+var token = localStorage.getItem('mecob_token');
+if(token){
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify',token:token})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.user){
+      if(d.user.role==='admin') window.location.href='/index.html';
+      else window.location.href='/funcionario.html';
+    } else {
+      localStorage.removeItem('mecob_token');
+      localStorage.removeItem('mecob_user');
+    }
+  }).catch(function(){});
+}
+
+document.getElementById('senha').addEventListener('keydown',function(e){
+  if(e.key==='Enter') entrar();
+});
+document.getElementById('email').addEventListener('keydown',function(e){
+  if(e.key==='Enter') document.getElementById('senha').focus();
+});
+
+function entrar(){
+  var email=document.getElementById('email').value.trim();
+  var senha=document.getElementById('senha').value;
+  var btn=document.getElementById('btn-login');
+  var erro=document.getElementById('erro');
+
+  if(!email||!senha){erro.textContent='Preencha e-mail e senha.';erro.style.display='block';return;}
+
+  btn.disabled=true;btn.textContent='Entrando...';erro.style.display='none';
+
+  fetch('/api/auth',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'login',email:email,password:senha})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.error){
+      erro.textContent=d.error;erro.style.display='block';
+      btn.disabled=false;btn.textContent='Entrar';
+      return;
+    }
+    localStorage.setItem('mecob_token',d.token);
+    localStorage.setItem('mecob_user',JSON.stringify(d.user));
+    if(d.user.role==='admin') window.location.href='/index.html';
+    else window.location.href='/funcionario.html';
+  }).catch(function(){
+    erro.textContent='Erro de conexão. Tente novamente.';erro.style.display='block';
+    btn.disabled=false;btn.textContent='Entrar';
+  });
+}
+</script>
+</body>
+</html>
