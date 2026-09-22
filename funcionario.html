@@ -289,7 +289,7 @@ function renderFb(){
       "<span style='font-size:11px;color:var(--mu);font-family:var(--mono)' id='fb-toggle-"+idx+"'>ver &rsaquo;</span>"+
       "</div>"+
       "<div class='fb-preview' style='font-size:13px;color:var(--mu);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+h.preview.slice(0,80)+"...</div>"+
-      "<div class='fb-full' id='fb-full-"+idx+"' style='display:none;margin-top:12px;font-size:13px;line-height:1.75;white-space:pre-wrap;border-top:1px solid var(--bd);padding-top:12px'>"+h.full+"</div>"+
+      "<div class='fb-full' id='fb-full-"+idx+"' style='display:none;margin-top:12px;font-size:13px;line-height:1.75;white-space:pre-wrap;border-top:1px solid var(--bd);padding-top:12px'>"+(h.full||h.preview)+"</div>"+
       "</div>";
   }).join('');
 }
