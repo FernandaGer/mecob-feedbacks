@@ -281,9 +281,27 @@ function renderFb(){
     el.innerHTML="<div class='fb-empty'>Nenhum feedback recebido ainda.</div>";
     return;
   }
-  el.innerHTML=hist.slice().reverse().map(function(h){
-    return "<div class='fb-item'><div class='fb-date'>"+h.dt+"</div><div class='fb-text'>"+h.preview+"</div></div>";
+  el.innerHTML=hist.slice().reverse().map(function(h,i){
+    var idx=hist.length-1-i;
+    return "<div class='fb-item' onclick='toggleFb("+idx+",this)' style='cursor:pointer'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:center'>"+
+      "<div class='fb-date' style='margin-bottom:0'>"+h.dt+"</div>"+
+      "<span style='font-size:11px;color:var(--mu);font-family:var(--mono)' id='fb-toggle-"+idx+"'>ver &rsaquo;</span>"+
+      "</div>"+
+      "<div class='fb-preview' style='font-size:13px;color:var(--mu);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+h.preview.slice(0,80)+"...</div>"+
+      "<div class='fb-full' id='fb-full-"+idx+"' style='display:none;margin-top:12px;font-size:13px;line-height:1.75;white-space:pre-wrap;border-top:1px solid var(--bd);padding-top:12px'>"+h.full+"</div>"+
+      "</div>";
   }).join('');
+}
+
+function toggleFb(idx,el){
+  var full=document.getElementById('fb-full-'+idx);
+  var toggle=document.getElementById('fb-toggle-'+idx);
+  var preview=el.querySelector('.fb-preview');
+  var open=full.style.display==='block';
+  full.style.display=open?'none':'block';
+  preview.style.display=open?'block':'none';
+  toggle.innerHTML=open?'ver &rsaquo;':'fechar &times;';
 }
 </script>
 </body>
