@@ -459,16 +459,26 @@ var currentArq=null;
   .then(function(r){return r.json();}).then(function(d){
     if(!d.user){localStorage.removeItem('mecob_token');window.location.href='/login.html';return;}
     if(d.user.role!=='admin'){window.location.href='/funcionario.html';return;}
-    // Adiciona botao de sair
+    // Adiciona botao de sair no topo da sidebar
     var sair=document.createElement('button');
     sair.textContent='Sair';
-    sair.style.cssText='position:fixed;bottom:16px;left:16px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;font-family:Inter,sans-serif;z-index:999';
+    sair.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:Inter,sans-serif;width:100%;margin-top:8px;transition:all .15s';
+    sair.onmouseover=function(){this.style.color='rgba(255,255,255,.8)';this.style.borderColor='rgba(255,255,255,.25)';};
+    sair.onmouseout=function(){this.style.color='rgba(255,255,255,.4)';this.style.borderColor='rgba(255,255,255,.1)';};
+    sair.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair';
     sair.onclick=function(){
       fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout',token:token})});
       localStorage.removeItem('mecob_token');localStorage.removeItem('mecob_user');
-      window.location.href='/login.html';
+      window.location.href='/login';
     };
-    document.body.appendChild(sair);
+    // Insere no topo da sidebar, antes do logo
+    var sidebar=document.querySelector('.sidebar');
+    if(sidebar){
+      var div=document.createElement('div');
+      div.style.cssText='border-top:1px solid rgba(255,255,255,.08);padding-top:12px;margin-top:4px';
+      div.appendChild(sair);
+      sidebar.appendChild(div);
+    }
   }).catch(function(){window.location.href='/login.html';});
 })();
 
