@@ -150,6 +150,7 @@ textarea{resize:vertical;line-height:1.5}
   <button class="nb" onclick="goPage('comparar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Comparar</button>
   <button class="nb" onclick="goPage('registrar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Registrar</button>
   <button class="nb" onclick="goPage('analise',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Analise semanal</button>
+  <button class="nb" onclick="goPage('config',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Configuracoes</button>
   <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.1)">
     <button class="nb" style="color:rgba(255,100,100,.7)" onclick="showZerar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>Zerar dados</button>
   </div>
@@ -247,6 +248,34 @@ textarea{resize:vertical;line-height:1.5}
     </div>
     <div id="an-r"></div>
   </div>
+  <!-- CONFIG -->
+  <div class="page" id="page-config">
+    <div class="ph"><h1>Configuracoes</h1><p>Gerencie os acessos dos lideres ao sistema</p></div>
+
+    <!-- Lista de usuarios -->
+    <div class="card" id="cfg-users-card">
+      <div class="cl">Usuarios cadastrados</div>
+      <div id="cfg-users-list"><div class="emp">Carregando...</div></div>
+    </div>
+
+    <!-- Criar usuario -->
+    <div class="card">
+      <div class="cl">Criar novo acesso</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label class="fl">Nome</label><input type="text" id="cfg-nome" placeholder="Nome do lider"/></div>
+        <div><label class="fl">E-mail</label><input type="text" id="cfg-email" placeholder="email@mecob.com.br"/></div>
+        <div><label class="fl">Senha inicial</label><input type="text" id="cfg-senha" placeholder="Mecob2026"/></div>
+        <div><label class="fl">Lider vinculado</label>
+          <select id="cfg-lider">
+            <option value="">— nenhum (admin) —</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btnp" onclick="criarUsuario()">Criar acesso</button>
+      <div id="cfg-msg" style="margin-top:8px"></div>
+    </div>
+  </div>
+
 </main>
 </div>
 
@@ -496,6 +525,7 @@ function goPage(id,el){
   else if(id==="comparar"){bwSel("cmp-w");renderCmp();}
   else if(id==="registrar")renderReg();
   else if(id==="analise"){bwSel("an-w");renderAnalise();}
+  else if(id==="config")renderConfig();
 }
 function bwSel(id){
   document.getElementById(id).innerHTML=allW().map(function(w){return "<option value='"+w+"'>"+w+"</option>"}).join("");
@@ -974,6 +1004,77 @@ function gerarAnalise(){
   box.innerHTML="<div style='padding:12px 0;color:var(--mu);font-size:13px'>Gerando analise...</div>";
   var resumo=fd.map(function(f){return f.l.name+" ("+f.l.dept+") — Score: "+gs(f.e).toFixed(1)+"/5 (D1:"+f.e.d1+" D2:"+f.e.d2+" D3:"+f.e.d3+" D4:"+f.e.d4+")\n"+(f.e.analysis||f.e.text.slice(0,300))}).join("\n\n---\n\n");
   fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:900,messages:[{role:"user",content:"Voce e consultor de gestao da MECOB — Motta Gestao e Cobranca, empresa de gestao de recebíveis agronegocio.\n\nAnalise os feedbacks da semana "+week+" ("+fd.length+"/"+LL.length+" lideres reportaram).\n\nRubrica usada: D1=Resultado, D2=Execucao Operacional, D3=Iniciativas/Inovacao, D4=Qualidade do Relatorio (25% cada, escala 1-5).\n\n"+resumo+"\n\nGere relatorio executivo com estas secoes:\nDESTAQUES DA SEMANA\nPONTOS DE ATENCAO\nPADROES IDENTIFICADOS\nRECOMENDACOES PARA A PROXIMA SEMANA\n\nSeja direto, objetivo e pratico. Max 400 palavras."}]})}).then(function(r){return r.json()}).then(function(d){box.innerHTML="<div style='font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--tx);padding:4px 0'>"+(d.content&&d.content[0]&&d.content[0].text||"Erro ao gerar.")+"</div>"}).catch(function(){box.innerHTML="<div style='color:var(--re);font-size:13px'>Erro ao conectar com a IA. Verifique sua conexao.</div>"});
+}
+
+/* ---- Configuracoes ---- */
+function renderConfig(){
+  // Preenche select de lideres
+  var sel=document.getElementById("cfg-lider");
+  if(sel){
+    sel.innerHTML='<option value="">— nenhum (admin) —</option>'+
+    LL.map(function(l){return '<option value="'+l.id+'">'+l.name+'</option>';}).join('');
+  }
+  // Carrega usuarios
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'list_users'})
+  }).then(function(r){return r.json();}).then(function(d){
+    var el=document.getElementById('cfg-users-list');if(!el)return;
+    if(!d.users||!d.users.length){el.innerHTML='<div class="emp">Nenhum usuario cadastrado.</div>';return;}
+    el.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+
+    d.users.map(function(u){
+      var lider=u.leader_id?LL.find(function(l){return l.id===u.leader_id;}):null;
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--sf2);border-radius:var(--r);border:1px solid var(--bd)">'+
+        '<div style="flex:1">'+
+          '<div style="font-size:13px;font-weight:500">'+u.name+'</div>'+
+          '<div style="font-size:11px;color:var(--mu);font-family:var(--mono)">'+u.email+' · '+(u.role==='admin'?'Admin':lider?lider.name:'—')+'</div>'+
+        '</div>'+
+        '<div style="display:flex;gap:6px">'+
+          '<button class="btn" style="font-size:11px;padding:5px 10px" onclick="alterarSenha(''+u.id+'',''+u.name+'')">Alterar senha</button>'+
+          (u.role!=='admin'?'<button class="btn" style="font-size:11px;padding:5px 10px;color:var(--re)" onclick="toggleAtivo(''+u.id+'','+u.active+')">'+( u.active?'Desativar':'Ativar')+'</button>':'')+
+        '</div>'+
+      '</div>';
+    }).join('')+'</div>';
+  }).catch(function(){
+    document.getElementById('cfg-users-list').innerHTML='<div class="emp">Erro ao carregar usuarios.</div>';
+  });
+}
+
+function criarUsuario(){
+  var nome=document.getElementById('cfg-nome').value.trim();
+  var email=document.getElementById('cfg-email').value.trim();
+  var senha=document.getElementById('cfg-senha').value.trim();
+  var lider=document.getElementById('cfg-lider').value;
+  var msg=document.getElementById('cfg-msg');
+  if(!nome||!email||!senha){msg.className='msg-err';msg.textContent='Preencha nome, e-mail e senha.';return;}
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'create_user',newEmail:email,newPassword:senha,newName:nome,newRole:lider?'employee':'admin',newLeaderId:lider||null})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.error){msg.className='msg-err';msg.textContent=d.error;return;}
+    msg.className='msg-ok';msg.textContent='Acesso criado para '+nome+'!';
+    document.getElementById('cfg-nome').value='';
+    document.getElementById('cfg-email').value='';
+    document.getElementById('cfg-senha').value='';
+    renderConfig();
+    setTimeout(function(){msg.textContent='';},4000);
+  }).catch(function(){msg.className='msg-err';msg.textContent='Erro ao criar acesso.';});
+}
+
+function alterarSenha(userId,nome){
+  var nova=prompt('Nova senha para '+nome+':');
+  if(!nova||nova.trim().length<4){alert('Senha deve ter pelo menos 4 caracteres.');return;}
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'change_password',userId:userId,newPassword:nova.trim()})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.error){alert('Erro: '+d.error);return;}
+    alert('Senha de '+nome+' alterada com sucesso!');
+  });
+}
+
+function toggleAtivo(userId,ativo){
+  if(!confirm((ativo?'Desativar':'Ativar')+' este usuario?'))return;
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'toggle_active',userId:userId,active:!ativo})
+  }).then(function(r){return r.json();}).then(function(){renderConfig();});
 }
 
 /* ---- Init ---- */
