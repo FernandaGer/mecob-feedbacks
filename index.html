@@ -279,6 +279,35 @@ textarea{resize:vertical;line-height:1.5}
 </main>
 </div>
 
+<!-- Modal Editar Entrada -->
+<div class="modal-bg" id="edit-modal" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal-box" style="height:auto;max-width:560px">
+    <div class="modal-hdr">
+      <span>Editar registro</span>
+      <div class="modal-btns"><button class="modal-close" onclick="closeEditModal()">Fechar</button></div>
+    </div>
+    <div style="padding:24px;overflow-y:auto;max-height:70vh">
+      <input type="hidden" id="edit-lid"/>
+      <input type="hidden" id="edit-idx"/>
+      <div class="fr"><label class="fl">Semana</label><input type="text" id="edit-week"/></div>
+      <div id="edit-scores" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px">
+        <div><label class="fl">D1 — Resultado</label><select id="edit-d1"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div><label class="fl">D2 — Execução</label><select id="edit-d2"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div><label class="fl">D3 — Iniciativas</label><select id="edit-d3"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div><label class="fl">D4 — Relatório</label><select id="edit-d4"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div>
+      </div>
+      <div class="fr"><label class="fl">Texto</label><textarea id="edit-text" style="min-height:80px"></textarea></div>
+      <div class="fr"><label class="fl">Análise</label><textarea id="edit-analysis" style="min-height:60px"></textarea></div>
+      <div class="fr"><label class="fl">Tags (separadas por vírgula)</label><input type="text" id="edit-tags"/></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btnp" onclick="salvarEdicao()">Salvar alterações</button>
+        <button class="btn" onclick="closeEditModal()">Cancelar</button>
+      </div>
+      <div id="edit-msg" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal E-mail -->
 <div class="modal-bg" id="email-modal" onclick="if(event.target===this)closeEmailModal()">
   <div class="modal-box" style="height:auto;max-width:480px">
@@ -825,6 +854,10 @@ function selL(lid,el){
       }
       if(e.analysis)html+="<div style='font-size:12px;line-height:1.55;white-space:pre-wrap;margin:6px 0'>"+e.analysis+"</div>";
       if((e.tags||[]).length)html+="<div class='tl'>"+e.tags.map(function(t){return "<span class='tag'>"+t+"</span>"}).join("")+"</div>";
+      html+="<div style='margin-top:10px;display:flex;gap:6px'>";
+      html+="<button class='btn' style='font-size:11px;padding:4px 10px' data-lid='"+lid+"' data-idx='"+entries.indexOf(e)+"' onclick='var b=this;editarEntrada(b.dataset.lid,parseInt(b.dataset.idx))'>Editar</button>";
+      html+="<button class='btn' style='font-size:11px;padding:4px 10px;color:var(--re)' data-lid='"+lid+"' data-idx='"+entries.indexOf(e)+"' onclick='var b=this;excluirEntrada(b.dataset.lid,parseInt(b.dataset.idx))'>Excluir</button>";
+      html+="</div>";
       html+="</div>";
     });
     html+="</div></div>";
@@ -1004,6 +1037,67 @@ function gerarAnalise(){
   box.innerHTML="<div style='padding:12px 0;color:var(--mu);font-size:13px'>Gerando analise...</div>";
   var resumo=fd.map(function(f){return f.l.name+" ("+f.l.dept+") — Score: "+gs(f.e).toFixed(1)+"/5 (D1:"+f.e.d1+" D2:"+f.e.d2+" D3:"+f.e.d3+" D4:"+f.e.d4+")\n"+(f.e.analysis||f.e.text.slice(0,300))}).join("\n\n---\n\n");
   fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:900,messages:[{role:"user",content:"Voce e consultor de gestao da MECOB — Motta Gestao e Cobranca, empresa de gestao de recebíveis agronegocio.\n\nAnalise os feedbacks da semana "+week+" ("+fd.length+"/"+LL.length+" lideres reportaram).\n\nRubrica usada: D1=Resultado, D2=Execucao Operacional, D3=Iniciativas/Inovacao, D4=Qualidade do Relatorio (25% cada, escala 1-5).\n\n"+resumo+"\n\nGere relatorio executivo com estas secoes:\nDESTAQUES DA SEMANA\nPONTOS DE ATENCAO\nPADROES IDENTIFICADOS\nRECOMENDACOES PARA A PROXIMA SEMANA\n\nSeja direto, objetivo e pratico. Max 400 palavras."}]})}).then(function(r){return r.json()}).then(function(d){box.innerHTML="<div style='font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--tx);padding:4px 0'>"+(d.content&&d.content[0]&&d.content[0].text||"Erro ao gerar.")+"</div>"}).catch(function(){box.innerHTML="<div style='color:var(--re);font-size:13px'>Erro ao conectar com a IA. Verifique sua conexao.</div>"});
+}
+
+/* ---- Editar / Excluir entrada ---- */
+function editarEntrada(lid,idx){
+  var e=(db[lid]||[])[idx];if(!e)return;
+  var l=LL.find(function(x){return x.id===lid;});
+  document.getElementById('edit-lid').value=lid;
+  document.getElementById('edit-idx').value=idx;
+  document.getElementById('edit-week').value=e.week||'';
+  document.getElementById('edit-text').value=e.text||'';
+  document.getElementById('edit-analysis').value=e.analysis||'';
+  document.getElementById('edit-tags').value=(e.tags||[]).join(', ');
+  var isPlan=l&&l.planejamento;
+  document.getElementById('edit-scores').style.display=isPlan?'none':'grid';
+  if(!isPlan){
+    document.getElementById('edit-d1').value=e.d1||3;
+    document.getElementById('edit-d2').value=e.d2||3;
+    document.getElementById('edit-d3').value=e.d3||3;
+    document.getElementById('edit-d4').value=e.d4||3;
+  }
+  document.getElementById('edit-msg').textContent='';
+  document.getElementById('edit-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeEditModal(){
+  document.getElementById('edit-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function salvarEdicao(){
+  var lid=document.getElementById('edit-lid').value;
+  var idx=parseInt(document.getElementById('edit-idx').value);
+  var e=(db[lid]||[])[idx];if(!e)return;
+  var l=LL.find(function(x){return x.id===lid;});
+  var isPlan=l&&l.planejamento;
+  e.week=document.getElementById('edit-week').value.trim();
+  e.text=document.getElementById('edit-text').value.trim();
+  e.analysis=document.getElementById('edit-analysis').value.trim();
+  e.tags=document.getElementById('edit-tags').value.split(',').map(function(t){return t.trim();}).filter(Boolean);
+  if(!isPlan){
+    e.d1=parseInt(document.getElementById('edit-d1').value);
+    e.d2=parseInt(document.getElementById('edit-d2').value);
+    e.d3=parseInt(document.getElementById('edit-d3').value);
+    e.d4=parseInt(document.getElementById('edit-d4').value);
+  }
+  var msg=document.getElementById('edit-msg');
+  save();
+  msg.className='msg-ok';msg.textContent='Alterações salvas!';
+  setTimeout(function(){
+    closeEditModal();
+    selL(lid,document.querySelector('.lc.sel'));
+  },1200);
+}
+
+function excluirEntrada(lid,idx){
+  if(!confirm('Excluir este registro? Não pode ser desfeito.'))return;
+  if(!db[lid])return;
+  db[lid].splice(idx,1);
+  save();
+  selL(lid,document.querySelector('.lc.sel'));
 }
 
 /* ---- Configuracoes ---- */
