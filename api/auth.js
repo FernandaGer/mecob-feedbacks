@@ -109,6 +109,17 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ users: data })
     }
 
+    // TOGGLE ATIVO
+    if (action === 'toggle_active') {
+      const { userId, active } = req.body
+      const { error } = await supabase
+        .from('users')
+        .update({ active })
+        .eq('id', userId)
+      if (error) throw error
+      return res.status(200).json({ ok: true })
+    }
+
     // ALTERAR SENHA
     if (action === 'change_password') {
       const { userId, newPassword } = req.body
