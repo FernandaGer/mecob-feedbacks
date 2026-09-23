@@ -1008,32 +1008,31 @@ function gerarAnalise(){
 
 /* ---- Configuracoes ---- */
 function renderConfig(){
-  // Preenche select de lideres
   var sel=document.getElementById("cfg-lider");
   if(sel){
     sel.innerHTML='<option value="">— nenhum (admin) —</option>'+
     LL.map(function(l){return '<option value="'+l.id+'">'+l.name+'</option>';}).join('');
   }
-  // Carrega usuarios
   fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({action:'list_users'})
   }).then(function(r){return r.json();}).then(function(d){
     var el=document.getElementById('cfg-users-list');if(!el)return;
     if(!d.users||!d.users.length){el.innerHTML='<div class="emp">Nenhum usuario cadastrado.</div>';return;}
-    el.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+
-    d.users.map(function(u){
+    var html='<div style="display:flex;flex-direction:column;gap:8px">';
+    d.users.forEach(function(u){
       var lider=u.leader_id?LL.find(function(l){return l.id===u.leader_id;}):null;
-      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--sf2);border-radius:var(--r);border:1px solid var(--bd)">'+
-        '<div style="flex:1">'+
-          '<div style="font-size:13px;font-weight:500">'+u.name+'</div>'+
-          '<div style="font-size:11px;color:var(--mu);font-family:var(--mono)">'+u.email+' · '+(u.role==='admin'?'Admin':lider?lider.name:'—')+'</div>'+
-        '</div>'+
-        '<div style="display:flex;gap:6px">'+
-          '<button class="btn" style="font-size:11px;padding:5px 10px" onclick="alterarSenha(''+u.id+'',''+u.name+'')">Alterar senha</button>'+
-          (u.role!=='admin'?'<button class="btn" style="font-size:11px;padding:5px 10px;color:var(--re)" onclick="toggleAtivo(''+u.id+'','+u.active+')">'+( u.active?'Desativar':'Ativar')+'</button>':'')+
-        '</div>'+
-      '</div>';
-    }).join('')+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--sf2);border-radius:var(--r);border:1px solid var(--bd)">';
+      html+='<div style="flex:1"><div style="font-size:13px;font-weight:500">'+u.name+'</div>';
+      html+='<div style="font-size:11px;color:var(--mu);font-family:var(--mono)">'+u.email+' &middot; '+(u.role==='admin'?'Admin':lider?lider.name:'sem lider')+'</div></div>';
+      html+='<div style="display:flex;gap:6px">';
+      html+='<button class="btn" style="font-size:11px;padding:5px 10px" data-uid="'+u.id+'" data-nome="'+u.name+'" onclick="alterarSenha(this.dataset.uid,this.dataset.nome)">Alterar senha</button>';
+      if(u.role!=='admin'){
+        html+='<button class="btn" style="font-size:11px;padding:5px 10px;color:var(--re)" data-uid="'+u.id+'" data-ativo="'+u.active+'" onclick="toggleAtivo(this.dataset.uid)">'+(u.active?'Desativar':'Ativar')+'</button>';
+      }
+      html+='</div></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
   }).catch(function(){
     document.getElementById('cfg-users-list').innerHTML='<div class="emp">Erro ao carregar usuarios.</div>';
   });
