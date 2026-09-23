@@ -62,3 +62,4 @@ No Vercel → seu projeto → **Settings** → **Domains**
 → adicione ex: `feedbacks.mecob.com.br`
 
 
+
