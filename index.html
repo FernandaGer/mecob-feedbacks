@@ -226,7 +226,7 @@ textarea{resize:vertical;line-height:1.5}
         <div><label class="fl">D4 — Relatorio</label><select id="rg-d4"><option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option></select></div>
       </div>
       <div class="fr"><label class="fl" id="rg-t-label">Texto do feedback (cole o conteudo do relatorio)</label><textarea id="rg-t" style="min-height:120px" placeholder="Cole aqui o conteudo extraido do arquivo..."></textarea></div>
-      <div class="fr"><label class="fl">Resumo / analise</label><textarea id="rg-a" style="min-height:70px" placeholder="Sua analise (opcional)"></textarea></div>
+      <div class="fr"><label class="fl">Resumo / analise</label><textarea id="rg-a" style="min-height:70px" placeholder="PONTOS POSITIVOS:\n- ...\n\nPONTOS NEGATIVOS:\n- ...\n\nACOMPANHAMENTO:\n- ..."></textarea></div>
       <div class="fr"><label class="fl">Temas (separados por virgula)</label><input type="text" id="rg-tg" placeholder="ex: comercial, ia, cobranca"/></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn btnp" onclick="salvar()">Salvar feedback</button>
@@ -613,7 +613,7 @@ function analisarArquivo(file, dataUrl){
   var base64=dataUrl.split(",")[1];
   var mediaType=file.type||"application/pdf";
 
-  var prompt="Voce e assistente de gestao da MECOB. Analise este relatorio semanal de "+l.name+" ("+l.dept+") e retorne um JSON com exatamente este formato (sem markdown, sem explicacao, so o JSON):\n{\n  \"resumo\": \"resumo executivo em 2-3 linhas\",\n  \"analise\": \"analise completa com pontos positivos e negativos separados por \\n\",\n  \"d1\": numero de 1 a 5,\n  \"d2\": numero de 1 a 5,\n  \"d3\": numero de 1 a 5,\n  \"d4\": numero de 1 a 5,\n  \"tags\": [\"tag1\",\"tag2\",\"tag3\"]\n}\n\nRubrica:\nD1 Resultado: entrega comercial/financeira/de pessoas conforme o setor\nD2 Execucao: demandas concluidas, prazos, volume operacional\nD3 Iniciativas: acoes proprias, inovacao, melhorias\nD4 Relatorio: qualidade, clareza, dados, estrutura";
+  var prompt="Voce e assistente de gestao da MECOB — Motta Gestao e Cobranca. Analise este relatorio semanal de "+l.name+" ("+l.dept+") e retorne um JSON com exatamente este formato (sem markdown, sem explicacao, so o JSON):\n{\n  \"resumo\": \"resumo encorpado do que aconteceu na semana — resultados, volume, acoes realizadas, contexto relevante (minimo 4 linhas)\",\n  \"analise\": \"PONTOS POSITIVOS:\n- [liste os pontos fortes com especificidade]\n\nPONTOS NEGATIVOS:\n- [liste os pontos fracos com clareza, sem suavizar]\n\nACOMPANHAMENTO PARA PROXIMA SEMANA:\n- [destaque o principal ponto que merece atencao ou follow-up]\",\n  \"d1\": numero de 1 a 5,\n  \"d2\": numero de 1 a 5,\n  \"d3\": numero de 1 a 5,\n  \"d4\": numero de 1 a 5\n}\n\nRubrica:\nD1 Resultado: entrega comercial/financeira/de pessoas conforme o setor\nD2 Execucao: demandas concluidas, prazos, volume operacional\nD3 Iniciativas: acoes proprias, inovacao, melhorias propostas\nD4 Relatorio: qualidade, clareza, dados quantitativos, estrutura";
 
   fetch("/api/analyze",{
     method:"POST",
@@ -646,10 +646,7 @@ function analisarArquivo(file, dataUrl){
       if(json.d2)document.getElementById("rg-d2").value=json.d2;
       if(json.d3)document.getElementById("rg-d3").value=json.d3;
       if(json.d4)document.getElementById("rg-d4").value=json.d4;
-      if(json.tags&&json.tags.length){
-        var tg=document.getElementById("rg-tg");
-        if(tg)tg.value=json.tags.join(", ");
-      }
+      // tags removidas do formulario
       if(statusEl){
         statusEl.textContent="Analise concluida! Revise os campos antes de salvar.";
         statusEl.style.color="var(--gr)";
